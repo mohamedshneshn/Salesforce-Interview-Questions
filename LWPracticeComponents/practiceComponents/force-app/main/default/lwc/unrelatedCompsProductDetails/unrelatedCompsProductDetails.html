@@ -1,0 +1,14 @@
+<template>
+    <lightning-card title="Unrealated Comps Product Details" icon-name="standard:product">
+        <div class="slds-m-around_medium">
+        <template if:true={product}>
+            <p><strong>Name: </strong>{product.Name}</p>
+            <p><strong>Price: </strong>{product.Price__c}</p>
+        </template>
+        <template if:false={product}>
+            <p>No Product Selected.</p>
+        </template>
+        </div>
+    </lightning-card>
+    
+</template>

@@ -1,0 +1,10 @@
+<template>
+    
+    <lightning-card title="Product Item" icon-name="standard:product">
+        <div class="slds-m-around_medium">
+            <p><strong>Name:</strong> {productName}</p>
+            <p><strong>Price:</strong> {productPrice}</p>
+            <lightning-button label="Add Cart" variant="brand" onclick={handleAddToCart} ></lightning-button>       
+        </div>
+    </lightning-card>
+</template>

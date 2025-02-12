@@ -41,18 +41,23 @@ Data Binding in LWC
 Example:
 ---------
 -  html file:
-    <template>
-        <p>{message}</p>
-    </template>
+   <template>
+    
+     <lightning-button label="Change Name" onclick={handleClick}></lightning-button>
+   </template>
 
 -  js file:
-    import { LightningElement ,track} from 'lwc';
-    export default class App extends LightningElement {
-        @track message = 'Hello World';
+    import { LightningElement } from 'lwc';
+
+    export default class OneWayBinding extends LightningElement {
+        name = 'Salesforce Developer';
+
+        handleClick() {
+            this.name = 'Lightning Web Components';
+        }
     }
 
  -  if you change the message in the js file, it will automatically update in the template.
- -  @track decorator is used to make the property reactive.
 
 2- two-way data binding (Event Handling)
 ----------------------------------------
@@ -70,7 +75,7 @@ Example:
 -  js file:
     import { LightningElement ,track} from 'lwc';
     export default class App extends LightningElement {
-        @track message = 'Hello World';
+        message = 'Hello World';
         handleChange(event){
             this.message = event.target.value;  //update the message property with the input value
         }
@@ -78,104 +83,50 @@ Example:
 
 ----------------------------------------------------------------------------------------------------------------------------
 
-how do you handle events in LWC?
----------------------------------
--  using event handlers in the HTML template.
-- like onclick, onchange, etc.
+Note: properties in LWC are reactive means when the property changes, the template is automatically updated.
+    : but if the property is an object or array, the default value is not reactive.
+    : if the property is a primitive type like string, number, etc, the default value is reactive.
+
+    so, to make the object or array reactive, we need to use the @track decorator.
 
 Example:
 ---------
 -  html file:
     <template>
-        <button onclick={handleClick}>Click Me</button>
-    </template>
+    <lightning-card title="Two Way Binding With Track Decerotor" icon-name ="standard:account">
+       <div class="slds-m-around_medium">
+           <lightning-input label = "Enter Your Name: " value ={person.name} onchange={handleInputName}></lightning-input>
+           <lightning-input label = "Enter Your Age: " value ={person.age} onchange={handleInputAge}></lightning-input>
+           <p> Hello, {person.name} Your Age is , {person.age}</p>
+       </div>
+    </lightning-card>
+  </template>
+
 
 -  js file:
-    import { LightningElement } from 'lwc';
-    export default class App extends LightningElement {
-        handleClick(){
-            alert('Button Clicked');
+    import { LightningElement, track } from 'lwc';
+
+    export default class TwoWayBindingWithTrackDecerotor extends LightningElement {
+        @track person = {
+            name: 'John Doe',
+            age: 30
+        };
+
+        handleInputName(event) {
+            this.person.name = event.target.value;
         }
+        
+        handleInputAge(event) {
+
+            this.person.age = event.target.value;
+        }   
+
     }
 
 ----------------------------------------------------------------------------------------------------------------------------
-
-what are the decorators in LWC?
--------------------------------
--  used to perform specific actions to enhance the how the data is handled in the component.
--  @track: used to make a property reactive means when the property changes, the template is automatically updated.
-         : the default value of the property if it is an object or array is not reactive.
-         : the default value of the property if it is a primitive type like string, number, etc is reactive.
-   ex: 
-    html file:
-        <template>
-            <p>{message}</p>
-            <lightning-button label="Change Message" onclick={changeMessage}></lightning-button>
-        </template>
-
-    js file:
-        import { LightningElement, track } from 'lwc';
-
-        export default class App extends LightningElement {
-            @track message = 'Hello World';
-
-            changeMessage() {
-                this.message = 'Hello Salesforce'; // Update the message property
-            }
-        }
-
-                 -----------------------------------------------------------
-
--  @api: used to make a property or method public so that it can be accessed by other components.
-       : used to pass data from a parent component to a child component.
-   ex:
-    html file:
-        <template>
-            <p>{message}</p>
-        </template>
-
-    js file:
-        import { LightningElement ,api} from 'lwc';
-        export default class App extends LightningElement {
-            @api message = 'Hello World';
-        }
-
--  @wire: used to fetch data from the Salesforce server(like apex methods, etc).
-    ex:
-     html file:
-            <template>
-                <template if:true={accounts.data}>
-                    <ul>
-                        <template for:each={accounts.data} for:item="account">
-                            <li key={account.Id}>{account.Name}</li>
-                        </template>
-                    </ul>
-                </template>
-                <template if:true={accounts.error}>
-                    <p>Error: {accounts.error}</p>
-                </template>
-            </template>
-    
-     js file:
-          import { LightningElement ,wire} from 'lwc';
-          import getAccountList from '@salesforce/apex/AccountController.getAccountList';
-          export default class App extends LightningElement {
-                @wire(getAccountList) accounts;
-          }
-
-    apex class:
-        public with sharing class AccountController {
-            @AuraEnabled(cacheable=true)
-            public static List<Account> getAccountList() {
-                return [SELECT Id, Name FROM Account LIMIT 5];
-            }
-        }
-
-    Note
-    -----
-    @AuraEnabled: used to allow the method to be called from the client-side controller.
-    cacheable=true: means that the result of the method is cached on the client side and can be reused
-                 if the same method is called again without making a new server call.
+ @AuraEnabled: used to allow the method to be called from the client-side controller.
+               cacheable=true: means that the result of the method is cached on the client side and can be reused
+               if the same method is called again without making a new server call.
 
 ----------------------------------------------------------------------------------------------------------------------------
 
@@ -246,6 +197,21 @@ what is the difference between wire method and imperative method in LWC?
                         });
                 }
             }
+
+--------------------------------------------------------------------------------------------------------------------------------
+-  @api: used to make a property or method public so that it can be accessed by other components.
+       : used to pass data from a parent component to a child component.
+   ex:
+    html file:
+        <template>
+            <p>{message}</p>
+        </template>
+
+    js file:
+        import { LightningElement ,api} from 'lwc';
+        export default class App extends LightningElement {
+            @api message = 'Hello World';
+        }
 
 --------------------------------------------------------------------------------------------------------------------------------
 what is LDS (Lightning Data Service)?
@@ -324,6 +290,7 @@ What are the lifecycle hooks in LWC?
 
 3- renderedCallback(): called after the component is inserted and rendered in the DOM.
                      : used to perform DOM manipulation, etc.
+                     : executed after every render cycle.
 
 
 4- disconnectedCallback(): called when the component is removed from the DOM.
@@ -526,11 +493,12 @@ Example:
 
     js file:
         import { LightningElement } from 'lwc';
-        import { publish, MessageContext } from 'lightning/messageService';
-        import MESSAGE_CHANNEL from '@salesforce/messageChannel/MyMessageChannel__c';
+        import { publish, MessageContext } from 'lightning/messageService'; // import the publish method and MessageContext to get the message context
+        import MESSAGE_CHANNEL from '@salesforce/messageChannel/MyMessageChannel__c';   // this is the message channel
         export default class Publisher extends LightningElement {
-            @wire(MessageContext)
-            messageContext;
+
+            @wire(MessageContext)  //get the message context 
+            messageContext;     //store the message context
 
             handleClick(){
                 const message = {
@@ -573,6 +541,10 @@ Example:
             <masterLabel>MyMessageChannel</masterLabel>
             <isExposed>true</isExposed>
             <description>My custom message channel</description>
+            <lightningMessageFields>
+                <fieldName>recordId</fieldName>
+                <fieldName>recordData</fieldName>
+            </lightningMessageFields>
         </LightningMessageChannel>
 
 --------------------------------------------------------------------------------------------------------------------------------
@@ -582,6 +554,36 @@ Example:
 
 
 
+What is slds?
+--------------
+-  SLDS (Salesforce Lightning Design System) is a CSS framework developed by Salesforce to build responsive and consistent user interfaces for Salesforce applications.
+-  used to build responsive and consistent user interfaces for Salesforce applications.
+
+-  SLDS consists of the following parts:
+    1- CSS: used to style the components.
+    2- Icons: used to add icons to the components.
+    3- Design Tokens: used to customize the design of the components.
+    4- Utilities: used to add utility classes to the components.
+
+
+How to use SLDS in LWC?
+-----------------------
+-  use the SLDS classes to style the components.    
+
+Example:
+---------
+-  html file:
+    <template>
+        <div class="slds-box slds-theme_default">
+            <p class="slds-text-heading_large">Hello World</p>
+        </div>
+    </template>
+
+
+what is the difference between SLDS and LWC?
+--------------------------------------------
+-  SLDS is a CSS framework used to style the components.
+-  LWC is a js framework used to build web components on the Salesforce platform.
 
 
 

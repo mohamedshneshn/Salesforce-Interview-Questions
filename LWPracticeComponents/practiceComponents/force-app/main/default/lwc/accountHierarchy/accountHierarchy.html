@@ -1,0 +1,29 @@
+<template>
+  <lightning-card title="Account Hierarchy" icon-name="standard:account">
+    <template if:true={hierarchy}>
+      <ul>
+        <template for:each={hierarchy} for:item="account">
+          <li key={account.Id}>
+            <span>{account.Name}</span>
+            <template if:true={account.children}>
+              <ul>
+                <template for:each={account.children} for:item="child">
+                  <li key={child.Id}>
+                    <span>{child.Name}</span>
+                    <template if:true={child.children}>
+                      <!-- Recursive rendering for nested accounts -->
+                      <c-account-hierarchy data-id={child.Id}></c-account-hierarchy>
+                    </template>
+                  </li>
+                </template>
+              </ul>
+            </template>
+          </li>
+        </template>
+      </ul>
+    </template>
+    <template if:true={error}>
+      <p class="error">{error}</p>
+    </template>
+  </lightning-card>
+</template>

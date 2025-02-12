@@ -150,7 +150,19 @@ go to roles
 
 
 
+Car-Hub Website : A Salesforce-based application designed to streamline car sales, service management, 
+                  and customer workflows. 
+    Users can: buy new and used cars.
+               customize new car orders.
+               search for cars by price, name, and model.
+               book test drive appointments using flatpickr.
+               schedule service appointments.
+               make payments through the Stripe API.
+               automate contract generation and signing using DocuSign.
 
+ The application automates car orders, service appointments, and payment processing through the Stripe API,
+  ensuring a seamless experience for both customers and internal teams. Customers can make payments, 
+  , and create cases for support or inquiries.
 
 
 

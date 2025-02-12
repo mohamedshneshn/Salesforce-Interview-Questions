@@ -1,0 +1,9 @@
+<template>
+    <lightning-card title="Two Way Binding With Track Decerotor" icon-name ="standard:account">
+       <div class="slds-m-around_medium">
+           <lightning-input label = "Enter Your Name: " value ={person.name} onchange={handleInputName}></lightning-input>
+           <lightning-input label = "Enter Your Age: " value ={person.age} onchange={handleInputAge}></lightning-input>
+           <p> Hello, {person.name} Your Age is , {person.age}</p>
+       </div>
+    </lightning-card>
+</template>

@@ -1,0 +1,17 @@
+<template>
+
+    <lightning-card title="Product List Parent To Child" icon-name="standard:products">
+        <div class="slds-m-around_medium">
+            <template for:each={products} for:item="product">
+                <c-parent-to-child-product-card
+                key={product.id}
+                product-name={product.name}
+                product-price={product.price}
+                product-id={product.id}
+                
+                ></c-parent-to-child-product-card>
+            </template>
+        </div>
+    </lightning-card>
+    
+</template>

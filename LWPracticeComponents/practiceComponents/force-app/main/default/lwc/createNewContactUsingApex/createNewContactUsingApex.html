@@ -1,0 +1,11 @@
+<template>
+    <lightning-card title="Create A New Contact Using Apex" icon-name="standard:contact">
+
+        <div class="slds-m-around_medium">
+            <lightning-input label="First Name" value={firstName} onchange={handleFirstName}></lightning-input>
+            <lightning-input label="Last Name" value={lastName} onchange={handleLastName}></lightning-input>
+            <lightning-input label="Email" value={email} onchange={handleEmail}></lightning-input>
+            <lightning-button label="Submit" onclick={handleClick} variant="brand"></lightning-button>
+        </div>
+    </lightning-card>
+</template>

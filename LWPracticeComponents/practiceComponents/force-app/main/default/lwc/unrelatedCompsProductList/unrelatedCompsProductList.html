@@ -1,0 +1,14 @@
+<template>
+    <lightning-card title=" Unrelated Comps Product List" icon-name="standard:product">
+        <div class="slds-m-around_medium">
+            <template for:each={products} for:item="product">
+              <c-unrelated-comps-product-card
+                key={product.Id}
+                product-name={product.Name}
+                product-id={product.Id}
+                onproductselected={handleProductSelected}
+              ></c-unrelated-comps-product-card>
+            </template>
+        </div>
+    </lightning-card>
+</template>

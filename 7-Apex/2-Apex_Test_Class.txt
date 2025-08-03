@@ -1,0 +1,751 @@
+/*
+🟥 what is Apex in Salesforce?
+---------------------------
+- Apex is an object-oriented programming language like Java and C#.
+- used to create custom business logic and automate processes in Salesforce.
+- used to perform DML operations and query records in Salesforce.
+- used to write triggers, classes, and web services in Salesforce.
+
+----------------------------------------------------------------------------------------------------------------------------
+🟥 What is LIST in Apex?
+---------------------------
+- ordered collection of elements of the same data type.
+- allows duplicate values.
+- can be accessed by index.
+- you can loops through the list to access each element.
+
+- Example:
+    List<Account> accounts = new List<Account>();
+    accounts.add(new Account(Name='Test Account 1'));
+    accounts.add(new Account(Name='Test Account 2'));
+
+- List Methods:
+    ✅- add(element): Adds an element to the list.
+    ✅- size(): Returns the number of elements in the list.
+    ✅- contains(element): Checks if the list contains the specified element.
+    ✅- get(index): Returns the element at the specified index.
+    ✅- remove(index): Removes the element at the specified index.
+    ✅- clear(): Removes all elements from the list.
+    
+
+🟪 What is SET in Apex?
+--------------------------
+- unordered collection of unique elements of the same data type.
+- does not allow duplicate values.
+- not indexed, so you cannot access elements by index.
+- you can loop through the set but the loop may not return elements in the same order they were added.
+
+- use case: when you want to store unique values and do not care about the order of the elements.
+          : Ex - storing records ids to check if a record exists in the collection or not.
+
+
+- Example:
+    Set<String> names = new Set<String>();
+    names.add('John');
+    names.add('Jane');
+    names.add('John'); // Duplicate value, will not be added
+
+- Set Methods:
+    - add(element): Adds an element to the set.
+    - size(): Returns the number of elements in the set.
+    - contains(element): Checks if the set contains the specified element.
+    - remove(element): Removes the specified element from the set.
+    - clear(): Removes all elements from the set.
+
+🟥 What is MAP in Apex?
+-----------------------
+- collection of key-value pairs where each key is unique.
+- Key is always unique and String.
+- Value can be any data type.
+- used to store records with a unique identifier to access them quickly without iterating
+  through the entire collection when searching for a specific record.
+- Example:
+    Map<Id, Account> accountMap = new Map<Id, Account>();
+    accountMap.put('001', new Account(Name='Test Account 1'));
+    accountMap.put('002', new Account(Name='Test Account 2'));
+
+- Map Methods:
+    ✅- put(key, value): Adds a key-value pair to the map.
+    ✅- get(key): Returns the value associated with the specified key.
+    ✅- keySet(): Returns a set of all keys in the map.
+    ✅- values(): Returns a list of all values in the map.
+    ✅- containsKey(key): Checks if the map contains the specified key.
+    ✅- containsValue(value): Checks if the map contains the specified value.
+    ✅- clear(): Removes all key-value pairs from the map.
+
+🟥 What is Object in Apex?
+----------------------------
+- generic data type that can hold any data type.
+- used to create dynamic data structures that can hold different types of data.
+- But if you want to use the value, you usually have to cast it to the correct type.
+- Example:
+    Object a = 'Hello';         // Holds a String
+    Object b = 123;             // Holds an Integer
+    Object c = true;            // Holds a Boolean
+
+    String str = (String) a;
+    Integer num = (Integer) b;
+    Boolean flag = (Boolean) c;
+
+    System.debug('String: ' + str);
+    System.debug('Integer: ' + num);
+    System.debug('Boolean: ' + flag);
+
+- Casting: used to convert an Object "Generic data type" to a specific data type to access the real value.
+- Use Case: when parsing JSON data or when working with dynamic data structures where the type is not known at compile time.
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+🟪 What is the Static and Dynamic Apex?
+---------------------------------------
+- Static Apex:
+    - refers to the code that is written and known at compile time(before the code is executed)
+    - all objects and fields are known at compile time.
+
+Example:
+-write a static Apex class to print the names of the first 10 accounts.
+public class StaticExample {
+    public static void printAccountNames() {
+        List<Account> accounts = [SELECT Name FROM Account LIMIT 10];
+        for (Account acc : accounts) {
+            System.debug('Account Name: ' + acc.Name);
+        }
+    }
+}
+    
+
+- Dynamic Apex:
+    - refers to the code that is written at runtime (while the code is acutally running).
+    - all objects and fields are not known at compile time.
+    - used to create reusable code that can work with different objects and fields.
+    - real-world example: when you want to search for records based on multiple criteria that are not known at compile time.
+    
+
+Example: search for the account records with the name 'Test Account' using dynamic SOQL query.
+public class DynamicApexExample {
+    public static void searchAccountRecords(String accountName) {
+        String query = 'SELECT Id, Name FROM Account WHERE Name = \'' +String.escapeSingleQuotes(accountName) + '\'';
+        List<Account> accounts = Database.query(query);
+        System.debug(accounts);
+    }
+
+Compile time vs Runtime:
+- Compile time: when you Write and save your class the code will be compiled to machine language.
+              : so you can check for syntax errors and other issues before the code is executed.
+- Runtime: when you execute the code by the user or triggers.
+
+🟪 Database.query() method:
+- used to execute dynamic SOQL queries at runtime.
+- allows you to construct a query as a string and execute it.
+
+🟪 SOQL injection 
+-----------------
+- is a type of attack where the attacker can insert code into soql query to get unauthorized access to the data.
+- happens in the dynamic SOQL.
+- in static apex salesforce automates the process of escaping single quotes in user input to prevent SOQL injection attacks.
+
+- Example:
+    - SELECT Id, Name FROM Account WHERE Name = ' + name + '
+    - if the attacker enters the value as '!= '''  or '1' = '1', the query will return all accounts in the org.
+
+- Use the escapeSingleQuotes() method to escape single quotes and treated as a character not as a part of the query.
+    - Example:
+        String name = '1' = '1';
+        query = String.escapeSingleQuotes(name);  //will be '1\' = \'1' becames '1=1'
+        List<Account> accounts = Database.query('SELECT Id, Name FROM Account WHERE Name = \'' + query + '\'');
+        System.debug(accounts);
+
+----------------------------------------------------------------------------------------------------------------------------
+🟥 what is the Governor Limits in Salesforce?
+------------------------------------------
+- Rules enforced by salesforce to prevent one application from taking up too many resources and impacting other applications.
+- determine the maximum number of DML operations  and SOQL queries that can be performed in a single transaction.
+- determine also num of callouts,future calls, batch jobs, and other operations per transaction.
+
+
+- Types of Governor Limits:
+    1- Per-Transaction Limits:
+        - Limits that apply to a single transaction.
+        - Example: Number of SOQL queries, Number of DML operations, Heap size limit, etc.
+
+    2- Per-Execution Context Limits:
+        - Limits that apply to a single execution context.
+        - Example: Number of future methods, Number of batch Apex jobs, etc.
+
+    3- Static Apex Limits:
+        - Limits that apply to the entire Salesforce instance.
+        - Example: Number of custom fields, Number of custom objects, etc.
+
+- Governor Limits in Salesforce:
+    - SOQL queries: 100
+    - DML operations: 150
+    - Heap size limit: 6 MB(synchronous Apex), 12 MB(asynchronous Apex)(Memory limit during execution)
+
+- Good coding practices to avoid hitting the governor limits:
+    1-avoid soql queries inside loops
+    2-avoid DML operations inside loops
+    3-use batch Apex for processing large data sets instead of using synchronous Apex
+    4-use future methods for long-running operations
+    5-use scheduled Apex for scheduled tasks
+
+                                         Syncronous Apex            Asyncronous Apex
+
+No of SOQL queries per transaction            100                         100
+No of records retrieved per transaction       50,000                      50,000
+
+No of SOSL queries per transaction             20                          20
+No of records retrieved per transaction        2000                        2000
+
+No of DML operations:                          150                         150     
+
+Heap size limit:                              6 MB                        12 MB
+(Memory limit during execution)
+
+Execution time:                               10 sec                       60 min(Batch Apex), 5 min(Future method),24 hours(Scheduled Apex)
+
+- If the governor limits are exceeded, Salesforce will throw a LimitException and the transaction will be rolled back.
+
+🟪 - How to monitor governor limits in the code:
+    - Use the Limits class to monitor governor limits in Apex code.
+    - Example:
+        System.debug('Number of SOQL queries: ' + Limits.getQueries()); //get num of used SOQL queries
+        System.debug('Number of SOQL queries: ' + Limits.getLimitQueries()); //get num of available SOQL queries
+        System.debug('Heap size: ' + Limits.getHeapSize() + ' bytes'); //get heap size in bytes
+        System.debug('Heap size limit: ' + Limits.getLimitHeapSize() + ' bytes'); //get heap size limit in bytes
+        System.debug('Number of DML operations: ' + Limits.getDmlStatements()); //get num of used DML operations
+        System.debug('Number of DML operations: ' + Limits.getLimitDmlStatements()); //get num of available DML operations  
+
+    ;
+----------------------------------------------------------------------------------------------------------------------------
+🟥 What is the apext test class?
+------------------------------
+- used to test the functionality of the Apex code.
+- ensures that the code works as expected.
+- should cover at least 75% of the code.
+
+🟥 key points:
+----------------
+✅ - Test classes & methods should be annotated with @isTest to identify them as test classes & methods.
+✅ - Test methods should be private static void.
+✅ - Test.startTest() and Test.stopTest()
+    * used to reset the governor limits before and after DML operations to avoid hitting the limits.
+   
+✅ - @testSetup method:
+    * used to create test data that can be used across all test methods in the test class.
+    * Runs before each test method in the class.
+    * reduces the amount of duplicate code in test methods.
+    * the data created in the @testSetup method should't be fire the triggers. because we cant access the modified data in the test class.
+    * Example:
+    * @testSetup static void setupTestData() {
+    *    // Create test data
+    * }
+
+✅ - System.assert(condition, message)
+    *  for Boolean checks.
+    * Verifying if the record is inserted or not.
+    * if the condition is false, the test will fail and the message will be displayed.
+    * example:  integer x = 5;
+             System.assert(x == 5, 'x should be equal to 5');  pass
+             System.assert(x == 10, 'x should be equal to 10'); fail
+
+✅ - System.assertEquals(expected, actual, message)
+    * for value comparisons.
+    * Verifying the number of inserted records.
+    * example:  integer x = 5;
+             System.assertEquals(5, x, 'x should be equal to 5');  pass
+             System.assertEquals(10, x, 'x should be equal to 10'); fail
+
+- System.assertNotEquals(expected, actual, message)
+
+🟥 Steps to create a test class:
+-----------------------------
+1- Create Test Data: Create test data that will be used in the test methods.
+2- Call the Method: Call the method that needs to be tested.
+3- Query the Data: Query the data to verify the results.
+4- Assert the Results: Use System.assert or System.assertEquals to verify the results.
+----------------------------------------------------------------------------------------------------------------------------
+🟥 How to handle the Error in the apex Class?
+---------------------------------------------
+- Syncronous Apex:
+    - Use try-catch blocks to handle errors in synchronous Apex code.
+    - Example:
+        try {
+            // Code that might throw an exception
+        } catch (Exception e) {
+            System.debug('Error: ' + e.getMessage());
+        }
+- Asynchronous Apex:
+    - Use try-catch blocks to handle errors in asynchronous Apex code.
+    - Example:
+        @future
+        public static void futureMethod() {
+            try {
+                // Code that might throw an exception
+            } catch (Exception e) {
+                System.debug('Error: ' + e.getMessage());
+            }
+        }
+    ❗ You cannot catch async errors outside the method
+    ❗  so you can save the error message to a custom object or send an email notification to the admin.
+    ❗  Salesforce Apex async methods like @future, Queueable, and Batch don’t return values or errors directly to the caller
+    ❗  so you can use the Database.SaveResult class to capture the errors encountered during DML operations.
+    
+
+🟥 How to handle the Error in JS?
+---------------------------------------------
+- Syncronous JavaScript:
+    - Use try-catch blocks to handle errors in synchronous JavaScript code.
+    - Example:
+        try {
+        let x = 10 / 0;
+        console.log(x);
+        } catch (err) {
+        console.error('Error:', err);
+        }
+🟪 -Asynchronous JavaScript:(Promises)
+    - Promise
+    📍 With .then() and .catch():
+    Example:
+        fetch('https://api.example.com/data')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
+    📍 With async/await and try...catch:
+    async function fetchData() {
+        try {
+            let response = await fetch('https://api.example.com/data');
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            let data = await response.json();
+            console.log(data);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    fetchData();
+
+----------------------------------------------------------------------------------------------------------------------------
+🟥 Types of Exceptions in Apex: 
+--------------------------------
+
+🟥- Generic Exception: catches all types of exceptions.
+Example:
+    try {
+        // Code that might throw an exception
+    } catch (Exception e) {
+        System.debug('Error: ' + e.getMessage());
+    }
+    
+Note: Exception is the base class for all exceptions in Apex.
+      DMLException, QueryException, and CustomException are subclasses of Exception.
+      e is the reference variable for the exception object.
+
+🟥- DML Exception: occurs when a DML operation fails.
+Example:
+    try {
+        insert new Account();
+    } catch (DmlException e) {
+        System.debug('Error: ' + e.getMessage());
+    }
+    
+🟥- Query Exception: occurs when a SOQL query fails.
+Example:
+    try {
+        List<Account> accounts = [SELECT Id, Name FROM Account];
+    } catch (QueryException e) {
+        System.debug('Error: ' + e.getMessage());
+    }
+    
+🟥- Custom Exception: custom exceptions can be defined by extending the Exception class.
+Example:
+    public class CustomException extends Exception {}
+    
+    try {
+        throw new CustomException('Custom Exception');
+    } catch (CustomException e) {
+        System.debug('Error: ' + e.getMessage());
+    }
+    
+----------------------------------------------------------------------------------------------------------------------------
+🟥 What is the Database Class in Apex?
+-------------------------------------
+- provides advanced ways to perform DML operations with extra control and error handling.
+- Perform DML dynamically.(Database.query()).
+- Support partial success in bulk operations via the allOrNone parameter.
+- Capture individual record errors.
+- Avoid the need for try-catch for every single record in bulk DML operations.
+- Use savepoints to rollback transactions partially.
+
+
+👉 Problem: If one record fails in a bulk operation, the entire transaction is rolled back so we can use Database class
+👉 Problem: in normal DML we can't know which record failed.
+
+    List<Account> accList = new List<Account>{
+        new Account(Name = 'Valid Account'),
+        new Account(Name = null),  // ❌ This will fail (Name is required)
+        new Account(Name = 'Another Valid')
+    };
+    insert accList;
+
+    ❌ What happens?  The entire insert fails. ,All 3 records are rolled back,and you don't know which record failed.
+
+- Methods in the Database Class:
+    ✅- Database.insert(records, allOrNone): Inserts the specified records.
+    ✅- Database.update(records, allOrNone): Updates the specified records.
+    ✅- Database.delete(records, allOrNone): Deletes the specified records.
+    ✅- Database.undelete(records, allOrNone): Undeletes the specified records.
+    ✅- Database.saveResult: Represents the result of a DML operation.
+    ✅- Database.SaveResult.isSuccess(): Checks if the DML operation was successful.
+    ✅- Database.SaveResult.getErrors(): Returns the errors encountered during the DML operation.
+    ✅- Database.setSavepoint(): Creates a savepoint to rollback the DML operation.
+    ✅- Database.rollback(savepoint): Rolls back the DML operation to the specified savepoint.
+      
+-Note: allOrNone parameter: 
+    - true: If an error occurs, the entire operation is rolled back.
+    - false: If an error occurs, the successful records are committed and the failed records are rolled back.
+
+
+- Example:
+    List<Account> accountsToInsert = new List<Account>{new Account(Name = 'Test Account 1'), new Account(Name = 'Test Account 2')};
+    Database.SaveResult[] saveResults = Database.insert(accountsToInsert, false); // 'false' allows partial success
+
+    for (Database.SaveResult sr : saveResults) {
+        if (sr.isSuccess()) {
+            System.debug('Successfully inserted: ' + sr.getId());
+        } else {
+            System.debug('Failed to insert: ' + sr.getErrors()[0].getMessage());
+        }
+    }
+    
+- Example with Savepoint:
+
+    Savepoint sp = Database.setSavepoint();
+    try {
+        Account acc1 = new Account(Name = 'Test Account');
+        insert acc1;
+        // Rollback if something goes wrong
+        Database.rollback(sp);
+    } catch (Exception e) {
+        System.debug('Error: ' + e.getMessage());
+        Database.rollback(sp);  // Rollback to savepoint if an error occurs
+    }
+
+----------------------------------------------------------------------------------------------------------------------------
+What is the Messaging.SingleEmailMessage class in Salesforce?
+------------------------------------------------------------
+- it is an Apex class used to send a single or bulk email messages using Apex code.
+- you can set the subject, body, sender, recipients, and attachments for the email.
+
+- Methods in the Messaging.SingleEmailMessage class:
+    ✅- setSubject(subject): Sets the subject of the email.
+    ✅- setPlainTextBody(body): Sets the plain text body of the email.
+    ✅- setHtmlBody(body): Sets the HTML body of the email.
+    ✅- setSenderDisplayName(name): Sets the display name of the sender.
+    ✅- setReplyTo(replyTo): Sets the reply-to email address.
+    ✅- setTargetObjectId(targetObjectId): Sets the ID of the contact, lead, or user to send the email to.
+
+- Example:
+    Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+    mail.setSubject('Test Email');
+    mail.setPlainTextBody('This is a test email message.');
+    mail.setTargetObjectId('005XXXXXXXXXXXX');
+
+    Messaging.sendEmail(new List<Messaging.SingleEmailMessage>{mail});
+
+----------------------------------------------------------------------------------------------------------------------------
+🟥1- Write an Apex class and a test class to to create one account.
+
+Apex class:
+------------
+public class CreateNewAccounts {
+    
+    public static void createOneAccount(string name){
+        
+        Account newAcc = new Account();
+        newAcc.Name = name;     
+        try{
+            insert newAcc;
+            System.debug('New Account Inserted'+newAcc);
+            
+        }catch(Exception e){
+            System.debug('Inserted Failed'+e.getmessage());
+        }
+    }
+}
+Test class:
+-----------
+@isTest
+public class TestCreateNewAccounts {
+
+    @isTest
+    private static void testCreateOneAccount_success(){
+
+        //create test data
+        String accName = 'TEST123';
+        
+        //call method
+        Test.startTest();
+        CreateNewAccounts.createOneAccount(accName);
+        Test.stopTest();
+        
+        //query record
+        List<Account> insertedAcc = [SELECT name FROM Account WHERE name= :accName];
+
+        //check
+        System.assertEquals('TEST123',insertedAcc[0].Name,'account name should be Test123');
+    }
+    
+    @isTest
+    private static void testCreateOneAccount_faliure(){
+        //create test data
+        String accName = '';
+        
+        //call method
+        Test.startTest();
+        CreateNewAccounts.createOneAccount(accName);
+        Test.stopTest();
+        
+        //query record
+        List<Account> insertedAcc = [SELECT name FROM Account WHERE name= :accName];
+        
+        //check
+        System.assertEquals(0, insertedAcc.size(), 'No accounts should be created for an empty name');
+        
+    }
+}
+
+🧠 Extra Tip:
+In test classes, it's always better to use List<...> for queries unless you're 100% sure
+at least one row will return.
+
+----------------------------------------------------------------------------------------------------------------------------
+🟥2- Write an Apex class and a test class to create multiple accounts.
+
+Apex class:
+------------
+public class CreateNewAccounts {
+    public static list<Account> createThreeAccounts(list<string> names){
+        
+        list<Account> newAccounts = new list<Account>(); 
+        for(String name:names){
+            Account newAcc = new Account();
+            newAcc.Name = name;
+            newAccounts.add(newAcc);
+        }
+        try{
+            insert newAccounts;
+            System.debug('new Accounts Inserted' + newAccounts);
+        }catch(Exception e){
+            System.debug('Failed Inserted' + e.getmessage());
+        }
+        return newAccounts;
+    } 
+}
+Test class:
+-----------
+@isTest
+private class TestCreateNewAccounts {
+        @isTest
+    private static void testCreateThreeAccounts_success(){
+        //create test data
+        list<string> accNames = new list<string>{'abc','def','hig'};
+
+        //call method
+        Test.startTest();
+         CreateNewAccounts.createThreeAccounts(accNames);
+        Test.stopTest();
+
+        //query records
+        List<Account> insertedAccounts = [SELECT Name FROM Account WHERE Name IN :accNames];
+
+        //check
+        System.assertEquals(3, insertedAccounts.size(), 'Three accounts should be created');
+
+    }
+    
+    @isTest
+    private static void testCreateThreeAccounts_failure(){
+        
+        //create test data
+        list<string> accNames = new list<string>{'','',''};
+
+        //call method
+        Test.startTest();
+        CreateNewAccounts.createThreeAccounts(accNames);
+        Test.stopTest();
+        
+        //query records
+        List<Account> createdAccounts = [SELECT Name FROM Account WHERE Name IN :accNames];
+
+        //check
+        System.assertEquals(createdAccounts.size(), 0, 'No accounts should be created for an empty input list');
+        
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------
+🟥3-Write an Apex class and a test class to update the Status to Closed for the 5 most recently modified Case record.
+
+Apex class:
+------------
+public class CaseUpdate {
+
+    public static list<case> updateRecentCases(){
+        list<case> recentCases = [SELECT id, status FROM Case ORDER BY lastModifiedDate DESC LIMIT 5 ];
+        
+        for( Case recentCase:recentCases){
+            recentCase.status = 'Closed';   
+        }
+        try{
+            update recentCases;
+            System.debug('cases updated'+ recentCases);
+        }catch(Exception e){
+            System.debug('updated failed'+ e.getmessage());
+        }
+        return recentCases;      
+    }
+}
+Test class:
+-----------
+@isTest
+public class TestCaseUpdate {
+    
+    @isTest
+    private static void testRecentCases_success(){
+
+        //create test data
+        list<Case> newCases = new list<case>();
+        for(Integer i=0 ; i <5; i++){
+            Case newCase = new Case();
+            newCase.status ='Open';
+            newCases.add(newCase);
+        }
+        Insert newCases;
+        
+        //call method to update Cases
+        Test.startTest();
+        CaseUpdate.updateRecentCases();
+        Test.stopTest();
+        
+        //query updated records
+        List<Case> updatedCases = [SELECT Id, Status FROM Case WHERE Status = 'Closed'];
+
+        //check
+        for(Case updatedCase : updatedCases) {
+            System.assertEquals('Closed', updatedCase.Status, 'Case status should be Closed');
+        }
+        System.assertEquals(5, updatedCases.size(), 'Five Cases should be updated');
+        
+
+    }
+   @isTest
+    static void testUpdateRecentCasesWithNoCases() {
+        // Ensure no Cases exist in the database
+        List<Case> existingCases = [SELECT Id FROM Case];
+        delete existingCases;
+
+        // Call the method to update Cases
+        Test.startTest();
+        List<Case> updatedCases = CaseUpdate.updateRecentCases();
+        Test.stopTest();
+
+        // Assert that no Cases were updated
+        System.assertEquals(0, updatedCases.size(), 'No Cases should be updated');
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------------------
+🟥4-Write an Apex class and a test class to delete the 3 oldest Account records.
+
+Apex class:
+------------
+public class DeleteOldAccounts {
+    
+    public void deleteOldAccounts(){
+        List<Account> accounts = [SELECT Id FROM Account ORDER BY CreatedDate ASC LIMIT 3];
+        
+        try{
+            Delete accounts;
+            System.debug('Accounts deleted successfully');
+        }catch(Exception e){
+            System.debug('Failed to delete accounts ' + e.getmessage());
+        }
+    }
+}
+
+Test class:
+-----------
+@isTest
+private class TestDeleteOldAccounts {
+    @isTest
+    static void testDeleteOldAccounts() {
+        List<Account> accounts = new List<Account>();
+        for(Integer i=0; i<3; i++){
+            accounts.add(new Account());
+        }
+        Insert accounts;
+        
+        Test.startTest();
+        DeleteOldAccounts.deleteOldAccounts();
+        Test.stopTest();
+        
+        List<Account> deletedAccounts = [SELECT Id FROM Account WHERE Id IN :accounts];
+        System.assertEquals(0, deletedAccounts.size(), 'Three accounts should be deleted');
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------------------
+🟥5-Write an Apex class and a test class to create 10 Accounts using Database class.
+
+Apex class:
+------------
+public class CreateAccountsUsingDatabase {
+    
+    public static void createAccounts(){
+        List<Account> accounts = new List<Account>();
+        for(Integer i=0; i<10; i++){
+            Account acc = new Account(Name='Test Account '+i);
+            accounts.add(acc);
+        }
+        
+        Database.SaveResult[] saveResults = Database.insert(accounts, false);
+        
+        for(Database.SaveResult sr : saveResults){
+            if(sr.isSuccess()){
+                System.debug('Successfully inserted: ' + sr.getId());
+            } else {
+                System.debug('Failed to insert: ' + sr.getErrors()[0].getMessage());
+            }
+        }
+        
+    }
+}
+Test class:
+-----------
+@isTest
+private class TestCreateAccountsUsingDatabase {
+    @isTest
+    static void testCreateAccounts() {
+        Test.startTest();
+        CreateAccountsUsingDatabase.createAccounts();
+        Test.stopTest();
+
+        List<Account> createdAccounts = [SELECT Id FROM Account];
+        System.assertEquals(10, createdAccounts.size(), 'Ten accounts should be created');
+    }
+}
+
+
+*/

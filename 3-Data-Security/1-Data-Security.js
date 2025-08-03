@@ -37,10 +37,17 @@ What is a profile?
 ------------------
 - is a collection of settings and permissions that define what a user can do in salesforce
 
-what is a permission set?
+✅ what is a permission set?
 -------------------------
 - is a collection of settings and permissions that define what a user can do in salesforce
 - is used to extend the permissions of a user
+
+✅ How to create a permission set?
+---------------------------------
+1- create new permission set, enter the name and description
+2- From object settings, select the object and set the permissions (read, create, edit, delete)
+3- add assignments then select the users to assign the permission set to
+
 
 
 what is user license?
@@ -145,26 +152,16 @@ go to roles
 - use case: the owner of the record can share the record with the manager
 
 
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+🟥 What is the permission set and permission set group?
+---------------------------------------------------
+- A permission set is an extra permission that can be assigned to a user to extend their access
+  beyond what is defined in their profile.
 
+- A permission set group is a collection of permission sets that can be assigned to users,
+  the benfit of using permission set groups is that you can assign multiple permission sets to a user at once,
 
-
-
-
-Car-Hub Website : A Salesforce-based application designed to streamline car sales, service management, 
-                  and customer workflows. 
-    Users can: buy new and used cars.
-               customize new car orders.
-               search for cars by price, name, and model.
-               book test drive appointments using flatpickr.
-               schedule service appointments.
-               make payments through the Stripe API.
-               automate contract generation and signing using DocuSign.
-
- The application automates car orders, service appointments, and payment processing through the Stripe API,
-  ensuring a seamless experience for both customers and internal teams. Customers can make payments, 
-  , and create cases for support or inquiries.
-
-
+-------------------------------------------------------------------------------------------------------------------------------
 
 
 

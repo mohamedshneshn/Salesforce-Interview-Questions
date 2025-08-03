@@ -17,7 +17,7 @@
  2-what are the types of relationships in salesforce?
 -----------------------------------------------------
 
-1- Lookup Relationship.
+ ⬜1- Lookup Relationship.
     Description: A flexible relationship where one object references another without a strict dependency between them.
                  The child object can exist independently of the parent.
 
@@ -29,7 +29,7 @@
                           --------------------------------------------
                           --------------------------------------------
 
-2- Master-Detail Relationship.
+ ⬜2- Master-Detail Relationship.
 
     Description: A relationship with strict dependency between parent and child objects. If the parent is deleted,
                  the child records are also deleted.
@@ -59,7 +59,7 @@
                           --------------------------------------------
 
 
-3- Many-to-Many Relationship.
+ ⬜3- Many-to-Many Relationship.
 
     Description: This relationship is created using a junction object, which allows each record from one object to be related
                  to multiple records in another object and vice versa.

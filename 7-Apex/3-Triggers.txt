@@ -1,0 +1,787 @@
+
+ 🟥 What is Apex Triggers?
+----------------------
+- it is an automation tool that allows you to perform custom actions before or after DML operations.
+  like validation, updating related records, or automating business processes.
+
+
+🟥 Types of Triggers:
+------------------
+- Before Triggers: used to perform custom actions before the record is saved to the database like validation rules.
+- After Triggers: used to perform custom actions after the record is saved to the database 
+                  like sending an email notification or updating related records.
+
+🟥 Trigger Events:
+-----------------
+        1- Before Insert : Trigger fires before the record is inserted into the database.
+        2- Before Update : Trigger fires before the record is updated in the database.
+        3- Before Delete : Trigger fires before the record is deleted from the database.
+        4- After Insert : Trigger fires after the record is inserted into the database.
+        5- After Update : Trigger fires after the record is updated in the database.
+        6- After Delete : Trigger fires after the record is deleted from the database.
+        7- After Undelete : Trigger fires after the record is recovered from the recycle bin.
+
+ 🟥 Note: There is no before undelete trigger event in Salesforce
+          - because the record is not active when it is in the recycle bin.
+          - there is no context to perform actions before the record is recovered.
+          - you can use after undelete trigger event to perform actions after the record is recovered like updating related records.
+          - When a record is recovered from the recycle bin, it is considered as an insert operation.
+          - When a record is deleted, it is moved to the recycle bin and can be recovered within 15 days.
+
+🟥 Trigger Context Variables:
+----------------------------
+- holds information about the trigger context like the new and old versions of the records, trigger events, etc.
+- used to control the trigger logic based on the trigger events.
+
+        🟥 1- Trigger.new :list of the new versions of the records being inserted or updated.
+                          :Available in before insert, before update, after insert, and after update triggers.
+                          :Not available in before delete, after delete because the record is being deleted.
+                          : [ {Id=Id1, Name=R1}, {Id=Id2, Name=R2}, {Id=Id3, Name=R3} ]
+
+        🟥 2- Trigger.old : list of the old versions of the records being updated or deleted.
+                          : Available in before update, after update, before delete, and after delete triggers.
+                          : Not available in before insert, after insert because the record is not saved yet.
+                          : [ {Id=Id1, Name=R1}, {Id=Id2, Name=R2}, {Id=Id3, Name=R3} ]
+
+      
+
+        🟥 3- Trigger.newMap :map of key-value pairs where the key is the record ID and the value is the record itself.
+                            :Available in before insert, before update, after insert, and after update triggers.
+                            :Not available in before delete, after delete because the record is being deleted.
+                            : [ {Id1=Record1}, {Id2=Record2}, {Id3=Record3} ]
+                            : used to store and update related records.
+                            : quick access to the record using the record ID.
+                            : used to compare the old and new versions of the records.
+        
+             Example: Map<Id, Account> newAccountMap = Trigger.newMap;
+          
+        🟥 4- Trigger.oldMap : Returns a map of the old versions of the sObject records.
+        🟥 5- Trigger.isInsert : Returns true if the trigger was fired due to an insert operation.
+        🟥 6- Trigger.isUpdate : Returns true if the trigger was fired due to an update operation.
+        🟥 7- Trigger.isDelete : Returns true if the trigger was fired due to a delete operation.
+        🟥 8- Trigger.isBefore : Returns true if the trigger was fired before the record was saved.
+        🟥 9- Trigger.isAfter : Returns true if the trigger was fired after the record was saved.
+        🟥 10- Trigger.isExecuting : Returns true if the trigger is currently executing.
+        🟥 11- Trigger.isUndelete : Returns true if the trigger was fired due to an undelete operation.
+
+
+🟥 Availability of Trigger.newMap and Trigger.oldMap Across Events
+-------------------------------------------------------------
+Trigger Event	Trigger.new		    Trigger.old		Modifiable?
+                Trigger.newMap      Trigger.oldMap
+
+before insert	✅ Available	       ❌ Not Available	✅ Yes, you can modify Trigger.new because the record is not saved yet
+after insert	✅ Available		   ❌ Not Available	❌ No because the record is already saved
+
+before update	✅ Available		   ✅ Available	    ✅ Yes, you can modify Trigger.new
+after update	✅ Available		   ✅ Available		❌ No
+
+before delete	❌ Not Available	   ✅ Available		❌ No 
+after delete	❌ Not Available	   ✅ Available		❌ No
+
+after undelete	✅ Available	       ❌ Not Available	❌ No
+
+
+🟥 Note 1   - we can't access directly fields from Related objects in the trigger .
+           - Trigger.new and Trigger.old contain only the fields of the current object.
+           - Related objects' fields (lookups, master-detail relationships) are not automatically included.
+           - To get related object fields, you must perform a SOQL query.
+
+            Example:
+            for (Case c : Trigger.new) {
+                if (c.Account.Rating == 'Hot') {  // ❌ This will throw an error!
+                    c.Priority = 'High';
+                }
+            }
+
+           To access related object fields, you need to perform a SOQL query
+           - Example:
+                Set<Id> accountIds = new Set<Id>();
+                for (Case c : Trigger.new) {
+                    accountIds.add(c.AccountId);
+                }
+            Map<Id, Account> accounts = new Map<Id, Account>([SELECT Id, Rating FROM Account WHERE Id IN :accountIds]);
+            for (Case c : Trigger.new) {
+                if (accounts.get(c.AccountId).Rating == 'Hot') {
+                    c.Priority = 'High';
+                }
+            }
+    
+🟥 Note 2 : ✅ Trigger.new and Trigger.newMap can only be modified in "before insert" and "before update" triggers.
+            - In "after insert" and "after update" triggers, the records are already saved to the database, so they cannot be modified.
+            - If you need to modify the records in "after insert" or "after update" triggers, you need to perform DML operations like update or insert.
+            - In "before delete" and "after delete" triggers, the records are being deleted, so they cannot be modified.
+
+            Example:
+            - trigger CaseTrigger on Case (before update) {
+                for (Case c : Trigger.new) {
+                    if (c.Reason == 'Resolved' && c.Status != 'Closed') {
+                        c.Status = 'Closed';  // ✅ Allowed in before update
+                    }
+                }
+            }
+            trigger CaseTrigger on Case (after update) {
+                for (Case c : Trigger.new) {
+                    c.Status = 'Closed';  // ❌ Not Allowed in after update (DML required)
+                }
+            }
+
+            solve this by using a separate update statement:
+            trigger CaseTrigger on Case (after update) {
+                List<Case> casesToUpdate = new List<Case>();
+                for (Case c : Trigger.new) {
+                    c.Status = 'Closed';  // ❌ Not Allowed in after update (DML required)
+                    casesToUpdate.add(c);
+                }
+                update casesToUpdate;  // Perform DML operation to update the records
+            }
+
+🟥 Note 3 : - in apex = is case-insensitive
+            'Hello' == 'hello' // true
+            'Hello' == 'HELLO' // true
+
+           - you can use .equals() method to compare strings in a case-sensitive manner.
+            'Hello'.equals('hello') // false
+
+🟥 Note 4 : we can't use = in the if condition we should use ==
+            - Example:
+                if (c.Reason = 'Resolved') {  // ❌ This will assign 'Resolved' to c.Reason
+                    c.Status = 'Closed';
+                }
+                
+🟥 Note 5 : - CreatedDate is not Writeable
+           - to set the CreatedDate of a record, you need to use the Test.setCreatedDate method in a test class.
+           - Example:
+                Test.setCreatedDate(newCase.Id, Date.today().addDays(-8));  // Set CreatedDate to 8 days ago
+
+
+🟥 Note 6 : - You can use addError() method to prevent DML operations like insert, update, delete, or undelete if the record does not meet certain criteria.
+            - Example:
+                if (opp.CloseDate < Date.today()) {
+                    opp.CloseDate.addError('Closing date cannot be in the past');  // Prevents save if CloseDate is in the past
+                }     
+----------------------------------------------------------------------------------------------------------------------------
+🟪 Best Practices for Triggers:
+-------------------------------
+1- Bulkify the Code: 
+    - handle multiple records at once to avoid hitting the governor limits.
+    - Use collections like lists, sets, and maps to process records in bulk instead of one by one.
+    - Avoid SOQL queries and DML operations inside loops.
+    - use map to store and update related records.
+2- Use Trigger Handler Classes:
+   - Separate the trigger logic into seprate classe to make the code more reusable and easier to maintain.
+3- Avoid SOQL Queries in Loops: Avoid querying the database inside loops to improve performance.
+4- Use Context Variables to Control the Trigger Logic.
+5- Write Unit Tests: Write unit tests to cover at least 75% of the trigger code to ensure it works as expected.
+
+🟪 Note:
+- use a synchronous process like Queueable Apex or Batch Apex for making callouts to external systems from triggers.
+----------------------------------------------------------------------------------------------------------------------------
+🟥 AggregateResult in Salesforce:
+---------------------------------
+- is a data type used to store the result of an aggregate query like SUM, AVG, MIN, MAX, COUNT.
+- stores the result of the aggregate query in a key-value pair format where the key is the alias of the aggregate function and the value is the result.
+- behaves like a list of maps where each map represents the result of an aggregate query.
+- should use .get() method to access the value of the aggregate result.
+- should cast the value to the appropriate data type before using it.
+-Snippet of the result of an aggregate query:
+  {{totalAmount=1000.0}, {totalAmount=2000.0}, {totalAmount=3000.0}}
+
+- Example:
+    List<AggregateResult> results = [SELECT SUM(Amount) totalAmount FROM Opportunity];
+    for(AggregateResult ar : results){
+        Decimal totalAmount = (Decimal) ar.get('totalAmount');
+    }
+
+
+----------------------------------------------------------------------------------------------------------------------------
+🟥 When would you use a Trigger instead of Workflow, Process Builder, or Flows?
+---------------------------------------------------------------------------
+- When you need to perform complex logic and handle multiple records at once.
+- When you need to update related records or perform cross-object operations.
+- When you need to validate the data before saving it to the database.
+
+------------------------------------------------------------------------------------------------------------------------------------------
+🟪 Handle the null values in triggers
+-------------------------------------
+- Use null checks to avoid NullPointerException.
+- Example:
+    if (c.AccountId != null) {
+        // Perform actions on the related Account
+    }
+
+ public class Question {
+	public static boolean isContact(String strContactId){
+		if( strContactId != null && strContactId.left(3)=='003'){
+			return true; 
+		}else{
+			return false;
+
+		}
+	}
+}
+
+🟪 Trigger Frameworks?
+--------------------
+- set of best practices to organize and manage triggers in Salesforce.
+1- Use a Trigger Handler Class to write the trigger logic.
+2- Use trigger context variables to separate the trigger logic based on the trigger events.
+3- Enforce a single trigger per object to avoid conflicts.
+
+🟪 Trigger Recursion
+--------------------
+🔹 occurs when a trigger invokes itself over and over again.
+🧨 Common Causes:
+    1- happens when triggers fire and make DML operations on the same object.
+    2- happens when cross-object triggers are involved
+       (e.g., an Account trigger updates Opportunities and the Opportunity trigger updates Accounts).
+
+⚠️ Consequences
+    1- Infinite loops.
+    2- Governor limit exceptions (DML, CPU, SOQL, etc.)
+
+✅ How to Prevent It
+    1- Use static flags to track if the trigger logic has already executed or not.
+
+🟪 Example of Preventing Trigger Recursion due to DML on the Same Object
+🧱 Step 1: Create a Static Utility Class
+
+    public class TriggerControl {
+    public static Boolean hasRunAccountLogic = false;
+    }
+    
+🔁 Step 2: Update the Trigger
+
+    trigger AccountTrigger on Account (after update) {
+    if (!TriggerControl.hasRunAccountLogic) {
+        TriggerControl.hasRunAccountLogic = true;
+        AccountTriggerHandler.updateAccountName(Trigger.new);
+    }
+}
+
+🔧 Step 3: Handler Class (with DML on Account)
+
+public class AccountTriggerHandler {
+    public static void updateAccountName(List<Account> newAccounts) {
+        List<Account> accountsToUpdate = new List<Account>();
+
+        for (Account acc : newAccounts) {
+            if (acc.Name != null && !acc.Name.endsWith(' - Updated')) {
+                Account updatedAcc = new Account(Id = acc.Id);
+                updatedAcc.Name = acc.Name + ' - Updated';
+                accountsToUpdate.add(updatedAcc);
+            }
+        }
+
+        if (!accountsToUpdate.isEmpty()) {
+            update accountsToUpdate; // ✅ Safe from recursion due to the static flag
+        }
+    }
+}
+
+🟪 Example of Preventing Trigger Recursion due to Cross-Object Updates
+ - Step 1: Create a Static Controller Class
+
+   public class TriggerControl {
+     public static Boolean hasRunAccountLogic = false;
+     public static Boolean hasRunOpportunityLogic = false;
+    }
+
+    - Step 2: Use the Flags in the Triggers
+    trigger AccountTrigger on Account (after update) {
+    if (!TriggerControl.hasRunAccountLogic) {
+        TriggerControl.hasRunAccountLogic = true;
+        AccountTriggerHandler.updateRelatedOpportunities(Trigger.newMap, Trigger.oldMap);
+    }
+}
+    trigger OpportunityTrigger on Opportunity (after update) {
+    if (!TriggerControl.hasRunOpportunityLogic) {
+        TriggerControl.hasRunOpportunityLogic = true;
+        OpportunityTriggerHandler.updateAccountRating(Trigger.new);
+    }
+}
+🧠 Important Notes"
+      1- trigger on the Account and on the Opportunity object considered as a single transaction because 
+         they are chained together.
+      2- static variables are reset after the transaction is completed, so they will not persist across different transactions.
+
+
+----------------------------------------------------------------------------------------------------------------------------
+🟥 Examples of Apex Trigger:
+------------------------
+🟥 1- Create a trigger to update the account name to uppercase before inserting the record.
+
+Apex Trigger:
+-------------
+trigger AccountTrigger on Account (before insert, before update){
+    if(Trigger.isBefore && (Trigger.isInsert || Trigger.isUpdate)){
+        AccountTriggerHandler.updateAccountName(Trigger.new);
+    }
+}
+Apex Trigger Handler Class:
+----------------------------
+public class AccountTriggerHandler {   
+    public static void updateAccountName(list<Account> newAccounts){
+
+        // ✅loop through the newAccountList
+        // ✅check the account name is not null and not equal upper case
+        // ✅update the account name to be upper case
+        
+        for(Account newAccount:newAccounts){
+            if(newAccount.Name != null && !newAccount.Name.equals(newAccount.Name.toUpperCase()) ){
+                newAccount.Name = newAccount.Name.toUpperCase(); // ✅ we can modify the record before insert and we dont have to make insert dml
+            }
+        } 
+    }
+}
+Apex Trigger Test Class:
+-------------------------
+@isTest
+public class AccountTriggerTest{
+    
+    @isTest
+    private static void updateAccountNameTest(){
+        // ✅create test data
+        Account newAcc = new Account(Name='bankofamerica');
+        
+        Test.startTest();
+        insert newAcc;
+        Test.stopTest();
+        
+        // ✅query inserted data  
+        Account insertedAcc = [SELECT name FROM Account WHERE id= :newAcc.Id];
+        System.assertEquals('BANKOFAMERICA',insertedAcc.Name,'Account name should be capital');  
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------
+🟥 2-A sales team wants to ensure that no Opportunity is created with a closing date in the past.
+   How would you enforce this with a trigger?
+
+Apex Trigger:
+-------------
+trigger OpportunityTrigger on Opportunity (before insert, before update){
+    if(Trigger.isBefore && (Trigger.isInsert || Trigger.isUpdate)){
+        OpportunityTriggerHandler.validateClosingDate(Trigger.new);
+    }
+}
+Apex Trigger Handler Class:
+----------------------------
+public class OpportunityTriggerHandler {
+    public static void validateClosingDate(List<Opportunity> opps) {
+        //loop on newOpps
+        //check the close date if in the past
+        //if true addError
+
+        for (Opportunity opp : opps) {
+            if (opp.CloseDate != null && opp.CloseDate < Date.today()) {
+                opp.CloseDate.addError('Closing date cannot be in the past');  //✅ Prevents save if CloseDate is in the past
+            }
+        }
+    }
+}
+
+Apex Trigger Test Class:
+-------------------------
+@isTest
+public class OpportunityTriggerTest {
+    @isTest
+    private static void testValidateClosingDate(){
+        
+        //create data
+        Opportunity newOpp = new Opportunity();
+        newOpp.Name = 'Test Opportunity';
+        newOpp.CloseDate = Date.today().addDays(-1);  // Set closing date in the past
+        
+        Test.startTest();
+        try{
+            insert newOpp;
+            System.assert(false, 'Opportunity with past closing date should not be inserted');
+        }catch(DmlException e){
+            System.assert(e.getMessage().contains('Closing date cannot be in the past'));
+        }
+        Test.stopTest();
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------
+🟥 3-A company wants to automatically update the Case Status to 'Closed' if the Case Reason is set to "Resolved" 
+    and the Case is older than 7 days .
+
+    // create a trigger on the case when the case is inserted or updated
+    // get the cases where the reason is resolved and the status is not closed
+    // check if the case created date is older than 7 days
+    // if true update the status to closed
+
+Apex Trigger:
+-------------
+trigger CaseTrigger on Case(before insert, before update){
+    if(Trigger.isBefore && (Trigger.isInsert || Trigger.isUpdate)){
+        CaseTriggerHandler.updateCaseStatus(Trigger.new);
+    }
+}
+Apex Trigger Handler Class:
+----------------------------
+public class CaseTriggerHandler { 
+    public static void updateCaseStatus(List<Case> newCases) {
+     list<Messaging.SingleEmailMessage> emails = new list<Messaging.SingleEmailMessage>();
+
+        for (Case newCase : newCases) {
+            if (newCase.Reason == 'Resolved' && newCase.Status != 'Closed' && 
+                newCase.CreatedDate <= Date.today().addDays(-7)) { 
+                newCase.Status = 'Closed';  // ✅ Update the status to Closed without DML
+
+                // Send email notification to Case Owner
+                Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+                email.setSubject('Case Closed Notification');
+                email.setPlainTextBody('Your case has been closed.');
+                email.setTargetObjectId(newCase.OwnerId);
+                emails.add(email);
+            }
+        }
+        if(!emails.isEmpty()){
+            Messaging.sendEmail(emails);
+        }
+    }
+}
+Apex Trigger Test Class:
+-------------------------
+@isTest
+public class CaseTriggerTest {
+    @isTest
+    private static void testUpdateCaseStatus() {
+        
+        Case newCase = new Case();
+        newCase.Subject = 'Test Case';
+        newCase.Reason = 'Resolved';
+        newCase.Status = 'Open';
+        insert newCase;
+
+        Test.setCreatedDate(newCase.Id, Date.today().addDays(-8));  // Set CreatedDate to 8 days ago
+
+        newCase.Reason = 'Resolved';
+        update newCase;
+
+        Case updatedCase = [SELECT Status FROM Case WHERE Id = :newCase.Id];
+        System.assertEquals(updatedCase.Status, 'Closed', 'Case status should be Closed');
+     
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------------------
+🟥 4-A company wants to automatically set the "High Priority" checkbox to TRUE on a Case record if the Case
+    is related to a VIP Customer.
+    A VIP Customer is defined as an Account where the Rating is "Hot".
+
+Apex Trigger:
+-------------
+trigger CaseTrigger on Case(before insert, before update){
+    
+    if(Trigger.isBefore && (Trigger.isInsert || Trigger.isUpdate)){
+        CaseTriggerHandler.updateRelatedAccounts(Trigger.new);
+    }
+}
+Apex Trigger Handler Class:
+----------------------------
+public class CaseTriggerHandler {
+    
+    public static void updateRelatedAccounts(List<Case> newCases) {
+        
+        // Collect Account IDs from new Cases (ensure AccountId is not null)
+        Set<Id> accountIds = new Set<Id>();
+
+        for (Case newCase : newCases) {
+            if (newCase.AccountId != null) {
+                accountIds.add(newCase.AccountId);
+            }
+        }
+        
+        // Exit early if no valid Account IDs
+        if (accountIds.isEmpty()) {
+            return;
+        }
+
+        // Query VIP Accounts (Rating = 'Hot')
+        Map<Id, Account> vipAccountsMap = new Map<Id, Account>(
+            [SELECT Id FROM Account WHERE Id IN :accountIds AND Rating = 'Hot']
+        );
+
+        // Exit early if no VIP accounts exist
+        if (vipAccountsMap.isEmpty()) {
+            return;
+        }
+
+        // Update Cases related to VIP Accounts
+        for (Case newCase : newCases) {
+            if (vipAccountsMap.containsKey(newCase.AccountId)) {
+                newCase.Priority = 'High';
+            }
+        }
+    }
+}
+Apex Trigger Test Class:
+-------------------------
+@isTest
+public class CaseTriggerTest {
+    @isTest
+    private static void testUpdateRelatedAccounts() {
+        
+        Account vipAccount = new Account(Name = 'VIP Account', Rating = 'Hot');
+        insert vipAccount;
+        
+        Case newCase = new Case(AccountId = vipAccount.Id);
+        insert newCase;
+        
+        Test.startTest();
+        Case updatedCase = [SELECT Priority FROM Case WHERE Id = :newCase.Id];
+        System.assertEquals(updatedCase.Priority, 'High', 'Case priority should be High');
+        Test.stopTest();
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------
+🟥 5-A company wants to prevent the deletion of Account records that have related Opportunities.
+    How would you implement this using a trigger?
+
+Apex Trigger:
+-------------
+trigger AccountTrigger on Account (before delete){
+    if(Trigger.isBefore && Trigger.isDelete){
+        AccountTriggerHandler.preventAccountDeletion(Trigger.old);
+    }
+}
+Apex Trigger Handler Class:
+----------------------------
+public class AccountTriggerHandler{  
+    public static void preventDelteAccountWithRelatedOpps(List<Account> oldAccounts){
+        Set<Id> accountIds = new Set<Id>();
+        for(Account acc : oldAccounts){
+            accountIds.add(acc.Id);
+        }
+        
+        // Query Opportunities related to the Accounts
+        Map<Id, Account> accountsWithOpps = new Map<Id, Account>([
+                          SELECT Id
+                          FROM Account
+                          WHERE Id IN :accountIds AND Id IN (SELECT AccountId FROM Opportunity)
+                       ]);
+
+        // Prevent deletion of Accounts with related Opportunities
+        for (Account acc : Trigger.old) {
+            if (accountsWithOpportunities.containsKey(acc.Id)) {
+                acc.addError('Cannot delete Account with related Opportunities.');
+            }
+        }
+
+    }
+}
+Apex Trigger Test Class:
+-------------------------
+@isTest
+public class AccountTriggerTest {
+
+    @isTest
+    private static void testPreventAccountDeletion(){ 
+        Account newAcc = new Account();
+        newAcc.Name = 'Test Account';
+        insert newAcc;
+        
+        Opportunity newOpp = new Opportunity();
+        newOpp.Name = 'Test Opportunity';
+        newOpp.AccountId = newAcc.Id;
+        insert newOpp;
+        
+        Test.startTest();
+        try{
+            delete newAcc;
+        }catch(DmlException e){
+            System.assert(e.getMessage().contains('Cannot delete account with related opportunities'));
+        }
+        Test.stopTest();
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------
+🟥 6- Write an Apex trigger to update the Account Rating to 'Cold' if the Account has no related Opportunities.
+   Account Rating should be 'Warm' if the Account has between 1 and 5 Opportunities,
+   and 'Hot' if the Account has more than 5 Opportunities.
+
+Apex Trigger:
+-------------
+trigger OpportunityTrigger on Opportunity(after insert, after update, after delete , after undelete){
+    if(Trigger.isAfter && (Trigger.isInsert || Trigger.isUpdate || Trigger.isDelete || Trigger.isUndelete)){
+        OpportunityTriggerHandler.updateAccountRating(Trigger.isDelete ? Trigger.old : Trigger.new);
+    }
+}
+Apex Trigger Handler Class:
+----------------------------
+public class OpportunityTriggerHandler {
+    
+    public static void updateAccountRating(List<Opportunity> Opps){
+        // Step 1: Collect Account Ids (Ignoring NULL values)
+      Set<Id> accIds = new Set<Id>();
+        for(Opportunity opp:opps){
+            accIds.add(opp.AccountId);
+        } 
+        // Exit if no valid AccountIds
+         if (accIds.isEmpty()) {
+            return; 
+        }     
+         // Step 2: Get the number of related Opportunities per Account
+        List<AggregateResult> RelatedOppsCount = [SELECT AccountId, COUNT(Id) numOfOpp
+                                                  FROM Opportunity
+                                                  WHERE AccountId IN:accIds
+                                                  GROUP BY AccountId];
+        
+        // Step 3: Map AccountId to Opportunity Count
+        map<Id, Integer> RelatedOppsCountMap = new Map<Id,Integer>();
+        for(AggregateResult ar:RelatedOppsCount){
+            Id accId = (Id) ar.get('AccountId');
+            Integer oppCount = (Integer) ar.get('numOfOpp');
+            RelatedOppsCountMap.put(accId,oppCount);
+        }
+            
+         // Step 4: Fetch Accounts and Update Rating Only If Needed
+        list<Account> relatedAccs = [SELECT name, id ,Rating FROM Account WHERE id IN:accIds];
+        for(Account acc:relatedAccs){
+            Integer count = RelatedOppsCountMap.get(acc.Id);
+            String newRating;
+            if(count == 0 || count == null){
+                newRating = 'COLD';
+            }
+            else if (count >=1 && count <=5){
+                newRating = 'WARM';
+            }else{
+                newRating = 'HOT';
+            }
+            // Only update if the Rating is different
+            if (acc.Rating != newRating) {
+                acc.Rating = newRating;
+            }
+        }
+        update relatedAccs;
+    }          
+}
+----------------------------------------------------------------------------------------------------------------------------
+🟥 7- Write an Apex trigger to update the Account Rating to 'Warm' if the Account has between 1 and 5 Opportunities.   
+  
+Apex Trigger:
+-------------
+trigger OpportunityTrigger On Opportunity (after insert, after update, after delete ,after undelete){
+    
+    if(Trigger.isAfter && (Trigger.isInsert || Trigger.isDelete || Trigger.isUpdate || Trigger.isUndelete)){
+        OpportunityTriggerHandler.updateAccountRating(Trigger.isDelete? Trigger.old : Trigger.new);
+    }
+}
+
+Apex Trigger Handler Class:
+----------------------------
+public class OpportunityTriggerHandler {
+    public static void updateAccountRating(List<Opportunity> Opps){  
+      //get the accIds for each opportunity
+      //calculate the num of opp per each account and get only 1>n>5
+      //update the account.rating to 'warm'
+      
+      Set<Id> AccIds = new Set<Id>();
+        for(Opportunity opp:opps){
+            AccIds.add(opp.AccountId);
+        }
+      List<AggregateResult> numOfRelatedOpps = [SELECT AccountId, COUNT(Id)
+                                                FROM Opportunity
+                                                WHERE AccountId IN:AccIds 
+                                                GROUP BY AccountId
+                                                HAVING COUNT(Id) >= 1
+                                                AND COUNT(Id) <= 5];
+        
+      map<Id, Account> accsToUpdate = new map<Id ,Account>();
+        for(AggregateResult ar:numOfRelatedOpps){
+            Id accId = (id) ar.get('AccountId');
+            accsToUpdate.put(accId, new Account(Id = accId, Rating ='Warm'));
+        }
+        update accsToUpdate.values();  
+  }
+}
+Apex Trigger Test Class:
+-------------------------
+@isTest
+public class OpportunityTriggerTest {
+    @isTest
+    private static void testUpdateAccountRating(){ 
+        Account newAcc = new Account();
+        newAcc.Name = 'Test Account';
+        insert newAcc;
+        
+        for(Integer i=0; i<3; i++){
+            Opportunity newOpp = new Opportunity();
+            newOpp.Name = 'Test Opportunity ' + i;
+            newOpp.AccountId = newAcc.Id;
+            insert newOpp;
+        }
+        
+        Test.startTest();
+        List<Account> updatedAccount = [SELECT Rating FROM Account WHERE Id = :newAcc.Id];
+        System.assertEquals(updatedAccount.Rating, 'Warm', 'Account rating should be Warm');
+        Test.stopTest();
+    }
+}  
+
+----------------------------------------------------------------------------------------------------------------------------
+🟥 8- When an Account’s status changes to ‘Inactive’, all related Opportunities should be marked as ‘Closed Lost’.
+   How would you accomplish this?
+
+Apex Trigger:
+-------------
+trigger AccountTrigger on Account (after update){
+    if(Trigger.isAfter && Trigger.isUpdate){
+        AccountTriggerHandler.updateRelatedOpportunities(Trigger.newMap, Trigger.oldMap);
+    }
+}
+Apex Trigger Handler Class:
+----------------------------
+public class AccountTriggerHandler {
+    public static void updateRelatedOpportunities(Map<Id, Account> newAccounts, Map<Id, Account> oldAccounts){
+       
+        set<Id> inactiveAccountIds = new set<Id>();
+        for(Id accId : newAccounts.keySet()){
+            if(newAccounts.get(accId).Status__c == 'Inactive' && oldAccounts.get(accId).Status__c != 'Inactive'){
+                inactiveAccountIds.add(accId);
+            }
+        }    
+        if(!inactiveAccountIds.isEmpty()){
+            List<Opportunity> oppsToUpdate = [SELECT Id, StageName FROM Opportunity WHERE AccountId IN :inactiveAccountIds AND StageName != 'Closed Lost'];
+            for(Opportunity opp : oppsToUpdate){
+                opp.StageName = 'Closed Lost';
+            }
+            if(!oppsToUpdate.isEmpty()){
+                update oppsToUpdate;
+            }            
+        }  
+}
+Apex Trigger Test Class:
+-------------------------
+@isTest
+public class AccountTriggerTest {
+    @isTest
+    private static void testUpdateRelatedOpportunities(){  
+        Account newAcc = new Account();
+        newAcc.Name = 'Test Account';
+        newAcc.Status__c = 'Active';
+        insert newAcc;  
+        Opportunity newOpp = new Opportunity();
+        newOpp.Name = 'Test Opportunity';
+        newOpp.AccountId = newAcc.Id;
+        newOpp.StageName = 'Prospecting';
+        insert newOpp;     
+        newAcc.Status__c = 'Inactive';
+        update newAcc;      
+        Opportunity updatedOpp = [SELECT StageName FROM Opportunity WHERE Id = :newOpp.Id];
+        System.assertEquals(updatedOpp.StageName, 'Closed Lost', 'Opportunity stage should be Closed Lost');
+    }
+}     
+
+----------------------------------------------------------------------------------------------------------------------------
+🟥 9- Trigger to Automatically Set a Contact’s Status to "Inactive" When the Related Account is Marked as "Inactive"
+
+ 
+ 
+
+
+
+
+*/

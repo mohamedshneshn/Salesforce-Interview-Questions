@@ -1,0 +1,98 @@
+/*
+
+What is Data Integration in Salesforce?
+---------------------------------------
+What are The Web Services in Salesforce?
+----------------------------------------
+- is the process of communicating and transferring data between Salesforce and other systems.
+- it can be done using REST API, SOAP API, Bulk API, and other integration tools.
+
+
+What is REST API in Salesforce?
+-------------------------------
+- REST (Representational State Transfer) API is an architectural style for building web services.
+- used to communicate salesforce with external systems like SAP, Oracle, etc.
+- used to perform CRUD (Create, Read, Update, Delete) operations on Salesforce objects.
+
+
+key points:
+-----------
+- REST API endpoints are URLs that represent objects and fields in Salesforce.
+- REST API uses standard HTTP methods like GET, POST, PUT, DELETE.
+- REST API responses are in JSON or XML format.
+
+
+REST API Endpoints:
+-------------------
+- /services/data/v54.0/query?q=SELECT+Id,Name+FROM+Account
+- /services/data/v54.0/sobjects/Account/
+- /services/data/v54.0/sobjects/Account/{accountId}
+
+
+To use REST API in Salesforce:
+------------------------------
+- use Http class to make REST API calls.
+- Enable REST API in Salesforce.
+- Get the access token using OAuth 2.0.
+- Use the access token to make REST API calls.
+- Use standard HTTP methods like GET, POST, PUT, DELETE.
+- Handle the response in JSON or XML format.
+- Use tools like Postman to test REST API calls.
+
+
+
+Example:
+--------
+public class RestExample {
+    public void getAccounts(){
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint('https://yourInstance.salesforce.com/services/data/v54.0/query?q=SELECT+Id,Name+FROM+Account');
+        request.setMethod('GET');
+        request.setHeader('Authorization', 'Bearer yourAccessToken');
+        
+        HttpResponse response = http.send(request);
+        if(response.getStatusCode() == 200){
+            List<Account> accounts = (List<Account>) JSON.deserialize(response.getBody(), List<Account>.class);
+            System.debug(accounts);
+        }
+    }
+    
+    public void createAccount(){
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint('https://yourInstance.salesforce.com/services/data/v54.0/sobjects/Account/');
+        request.setMethod('POST');
+        request.setHeader('Authorization', 'Bearer yourAccessToken');
+        request.setHeader('Content-Type', 'application/json');
+        request.setBody('{"Name": "Test Account"}');
+        
+        HttpResponse response = http.send(request);
+        if(response.getStatusCode() == 201){
+            Account newAccount = (Account) JSON.deserialize(response.getBody(), Account.class);
+            System.debug(newAccount);
+        }
+    }
+}
+
+Example:
+--------
+- To get a list of accounts using REST API:
+  GET /services/data/v54.0/query?q=SELECT+Id,Name+FROM+Account
+
+- To create a new account using REST API:
+    POST /services/data/v54.0/sobjects/Account/
+    {
+        "Name": "Test Account"
+    }
+    
+
+🟥how can i implement (when the lead is created on org1 we need to send it to org2)
+
+what vis the difference between the patch and put method in REST API?
+- PUT: used to update an existing resource or create a new resource if it doesn't exist.
+- PATCH: used to update an existing resource partially.
+- PUT requires the entire resource to be sent in the request body.
+- PATCH requires only the fields to be updated to be sent in the request body.
+
+*/

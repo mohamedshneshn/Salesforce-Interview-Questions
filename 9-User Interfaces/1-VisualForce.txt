@@ -1,5 +1,5 @@
-/*
-what is visualforce?
+
+🟥 what is visualforce?
 --------------------
 - is the old way of creating custom user interfaces in salesforce.
 - it is server-side rendering which means that the page is rendered on the server and then sent to the client
@@ -16,8 +16,25 @@ Explain the visualforce page lifecycle?
 4- the server processes the data and renders the visualforce page.
 5- the server sends the visualforce page to the client.
 
+----------------------------------------------------------------------------------------------------------------
 
 
+🟥  VF tags:
+-------------
+- <apex:page> - the root tag of a visualforce page.
+- <apex:form> - used to create a form that can submit data to the server.
+- <apex:inputField> - used to create an input field for a specific field on an object.
+- <apex:pageBlock> - used to create a block of content that can be styled and formatted.
+- <apex:pageBlockSection> - used to create a section within a page block.
+- <apex:pageBlockButtons> - used to create a section for buttons within a page block.
+- <apex:commandButton> - used to create a button that can submit data to the server or perform an action.
+- <apex:outputText> - used to display text on the page.
+- <apex:actionStatus> - used to display the status of an action, such as a save or delete operation.
+- <apex:actionSupport> - used to add AJAX support to a component, allowing it to perform actions without a full page reload.
+
+
+
+----------------------------------------------------------------------------------------------------------------
 Example:
 --------
 
@@ -38,18 +55,14 @@ Example:
 </apex:page>
 
 
-public class AccountController {
-    
+public class AccountController {  
         public Account account {get;set;}
-    
         public AccountController() {
             account = new Account();
         }
-    
         public void saveAccount() {
             insert account;
         }
     }
 
 
-*/

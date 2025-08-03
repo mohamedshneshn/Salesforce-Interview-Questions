@@ -1,0 +1,134 @@
+/*
+
+what is the difference between synchronous and asynchronous processing in Salesforce?
+-------------------------------------------------------------------------------------
+- Sync processing:
+    - runs immediately 
+    - user has to wait for the process to complete
+    - Example: validation rules, Triggers.
+    - used for short-running operations
+    - governor limits are lower [100 SOQL p
+- Async processing:
+    - runs in the background
+    - user does not have to wait for the process to complete
+    - used for bulk processing - callouts to external systems 'API calls' - scheduled jobs
+    - Example: Batch Apex, Future Apex, Queueable Apex, Scheduled Apex.
+    - governor limits are higher
+
+
+🟥 1-Batch Apex:
+------------------
+- Used to handle large amounts of data in Salesforce by breaking the data into batches rather than 
+  processing all the data at once to avoid hitting governor limits.
+
+
+- Batch Apex consists of three methods:
+    1- start(): used to query the records to be processed.
+    2- execute(): used to execute the logic on the batch records. like updating the records, deleting the records, etc.
+    3- finish(): used to perform final actions after the batch job is completed.
+
+Note:
+-----
+- the batch size is 200 records by default, and can be changed using the scope parameter in the Database.executeBatch() method.
+- we can run 5 batch jobs concurrently in an org.
+
+
+- Example:
+
+global class CloseOpenCases implements Database.Batchable<SObject> {
+    
+    public Database.QueryLocator start(Database.BatchableContext bc){
+        return Database.GetQueryLocator([SELECT id, status FROM Case WHERE status != 'Closed']);
+        
+    }
+    
+    public  void execute(Database.BatchableContext bc ,List<Case> cases){
+        
+        for(Case c:cases){
+            c.status = 'Closed';
+        }
+        update cases;  
+    }
+    
+     public void finish(Database.BatchableContext bc){
+        System.debug('Batch hass completed');
+    }
+    
+}
+
+- To run the batch job:
+    CloseOpenCases batch = new CloseOpenCases();
+    Database.executeBatch(batch);
+
+- Note:
+    - Batch Apex jobs can be scheduled to run at specific times using the System.scheduleBatch() method.
+    - Batch Apex jobs can be chained, meaning one batch job can trigger another batch job after it completes.
+    - Batch Apex jobs can be monitored in the Salesforce UI under Setup > Jobs > Apex Jobs.
+
+@isTest
+public class CloseOpenCasesTest {
+
+    @isTest
+    public static void testBatchClass(){
+        
+        //create test data
+        //inserted
+        //Query inserted data
+        //call the batch class
+        
+        List<Case> newCases = new List<Case>();
+        
+        for(integer i = 0 ; i< 5 ; i++){
+            Case newCase = new Case();
+            newCase.Status = 'Open';
+            newCase.Origin = 'Phone';
+            newCase.Subject = 'test'+i;
+            
+            newCases.add(newCase);
+        }
+        
+        insert newCases;
+
+        Test.startTest();   //should be used to start the test context  as batch jobs run asynchronously
+        Database.executeBatch(new CloseOpenCases());
+        Test.stopTest();    //should be used to stop the test context
+        
+        List<Case> insertedCases = [SELECT id,status FROM Case WHERE id IN :newCases]; //sf is smart to check id in newCases by id.
+        
+        for(Case c:insertedCases){
+            System.assertEquals('Closed',c.status,'Status Should be closed');
+        }
+    }
+    
+}
+
+🟥 2-Fututre Apex
+------------------
+- used to perform simple actions asynchronously without blocking the user interface.
+Example: send email notifications when a record is created or updated.
+- makes a callout to an external system without job chaining.
+Example: call an external API to get data when a record is created or updated.
+    
+
+
+🟥 3-Quedable Apex
+-------------------
+- Similar to Future Apex, but allows for more complex processing and job chaining.
+- Allows for job chaining, meaning one job can trigger another job after it completes.
+-Ex: 
+
+
+
+
+🟥 3-scheduled Apex:
+--------------------
+- Used to schedule a job to run at a specific time or interval.
+- used fordaily, weekly, or monthly jobs.
+
+
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+*/

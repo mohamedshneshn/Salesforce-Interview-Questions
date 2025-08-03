@@ -1,15 +1,38 @@
 /*
 
-What is LWC?
+🟥  What is LWC?
 --------------------------------
--  Lightning Web Components is a modern js framework developed by Salesforce to build web components on the Salesforce platform.
--  used to build reusable and responsive components for Salesforce applications.
+-  Lightning Web Components is a modern js framework developed by Salesforce to build web components.
 
-LWC vs Aura Components
+🟥  LWC vs Aura Components
 -----------------------
--  LWC is faster than Aura components because it is built on native web standards while Aura components are built on a custom framework called Aura.
-- Aura components cant be used in LWC but LWC can be used in Aura components.   
+- LWC (Lightning Web Components) is faster than Aura components because it is built on native web standards
+  (like modern JavaScript, HTML,Shadow DOM, and Web Components).
 
+- Aura components are built on a custom Salesforce framework called Aura, which adds extra processing
+   and is generally slower.
+
+- LWC can be used inside Aura components, but Aura components cannot be used inside LWC.
+
+
+
+🟥  What is the DOM?
+-------------------
+-  DOM (Document Object Model) is a programming interface for web documents.
+-  it represents the structure of a web page as a tree of objects.
+- used to manipulate the structure, style, and content of a web page using JavaScript.
+
+🟥  What is Shadow DOM?
+-----------------------
+-  Shadow DOM is a web standard that enables encapsulation of DOM and CSS styles.
+-  It allows developers to create components with their own isolated DOM tree, preventing styles from leaking in or out.
+-  Shadow DOM is a key feature of Web Components and is used in LWC to create reusable components.
+
+🟥  What is a virtual DOM?
+---------------------------
+-  Virtual DOM is a programming concept where a virtual representation of the actual DOM is kept in memory.
+-  It allows for efficient updates and rendering of the UI by minimizing direct manipulation of the real DOM.
+-  Frameworks like React use a virtual DOM to improve performance and provide a smoother user experience.
 
 How to create a LWC?
 ---------------------
@@ -17,14 +40,13 @@ How to create a LWC?
 -  Create a new LWC component using the Salesforce CLI.
 -  Write the HTML, JavaScript, and CSS code for the component.
 
-what files are created when you create a LWC?
+⬜ What files are created when you create a LWC?
 ----------------------------------------------
 -  .html file: contains the structure of the component.
 -  .js file: contains the logic of the component like event handling, data fetching, etc.
 -  .js-meta.xml file: configure the visibility of the component (record page, lightning app, etc).
 
-
-what is a template in LWC?
+⬜ What is a template in LWC?
 ---------------------------
 -  Template is an HTML file that contains the structure of the component.
 
@@ -42,6 +64,7 @@ Example:
 ---------
 -  html file:
    <template>
+         <p>Hello, {name}</p>
     
      <lightning-button label="Change Name" onclick={handleClick}></lightning-button>
    </template>
@@ -214,7 +237,7 @@ what is the difference between wire method and imperative method in LWC?
         }
 
 --------------------------------------------------------------------------------------------------------------------------------
-what is LDS (Lightning Data Service)?
+⬜what is LDS (Lightning Data Service)?
 -------------------------------------
 - LDS is a powerful framework provided by Salesforce to interact with Salesforce data without writing any server-side code because it is built on the Lightning Platform.
 -  used to interact with Salesforce data without writing any server-side code.
@@ -278,7 +301,7 @@ Wire : requires code to interact with Salesforce data.
 
 --------------------------------------------------------------------------------------------------------------------------------
 
-What are the lifecycle hooks in LWC?
+⬜What are the lifecycle hooks in LWC?
 -------------------------------------
 - lifecycle hooks are methods that are called at different stages of a component's lifecycle.
 
@@ -368,7 +391,12 @@ Example:
 2- Child to Parent: using custom events to pass data from the child component to the parent component.
                   : create a custom event in the child component and dispatch the event to the parent component.
 
+import {LightningElement} from 'lwc'
 
+export default class Parent extends LightningElement{
+
+@trac message;
+}
 Example:
 ---------
 -  parent component:
@@ -470,7 +498,7 @@ Example:
 
 --------------------------------------------------------------------------------------------------------------------------------
 
- what is LMS (Lightning Message Service)?
+⬜ what is LMS (Lightning Message Service)?
 -----------------------------------------
 
 -  LMS is a messaging service provided by Salesforce to communicate between components in the Lightning Web Components.
@@ -548,13 +576,7 @@ Example:
         </LightningMessageChannel>
 
 --------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-What is slds?
+⬜ What is slds?
 --------------
 -  SLDS (Salesforce Lightning Design System) is a CSS framework developed by Salesforce to build responsive and consistent user interfaces for Salesforce applications.
 -  used to build responsive and consistent user interfaces for Salesforce applications.

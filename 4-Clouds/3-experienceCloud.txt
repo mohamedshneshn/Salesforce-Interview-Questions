@@ -1,0 +1,155 @@
+/*
+ ⬜ What is Salesforce Experience Cloud?
+----------------------------------------
+- it is a platform for creating websites to share information and collaborate with external users
+  like customers or internal users like employees.
+
+
+
+
+⬜ What are the key features of Experience Cloud?
+---------------------------------------------------
+1. pre-built templates that can be customized to match your brand.()
+2. community builder where you can drag and drop components to create pages without code.
+4. security and access control based on the user's profile.
+5. personalization to show relevant content to users.
+6. analytics to track user engagement.
+7. mobile optimization to make your site responsive.
+
+🟦 What are differnt types of communities in salesforce?
+---------------------------------------------------------
+1. Customer Communities:to access self-service support, account information, track cases, and more.
+2. Partner Communities: to collaborate with partners, manage leads, and track sales.
+3. Employee Communities: to connect employees with the information they need to be successful.
+
+
+⬜ What are the Experience Cloud Licenses?
+------------------------------------------
+- determine what users can access in an Experience Cloud site.
+1. Customer Community License: Supports self-service, case management, and knowledge base access.
+2. Customer Community Plus License: Supports self-service, case management, and knowledge base access, plus access to reports and dashboards.
+3. Partner Community License
+4. Partner Community Plus License
+5. Employee Community License
+6. Employee Community Plus License
+
+🟪 What types of users can access salesforce Experience cloud?
+-------------------------------------------------------------
+1. Authenticated Users: users who have a Salesforce account like employees.
+2. Unauthenticated Users: users who don't have a Salesforce account like customers.
+3. Guest Users: users who access the site without logging in
+
+🟪 how to control the component visibility in experience cloud based on user role?
+----------------------------------------------------------------------------------
+- by using the "Component Visibility" settings in the component properties.
+- Create new visibility rule.
+- You can set visibility based on user roles, profiles, or permission sets.
+
+
+⬜ How do you implement role-based access in experience cloud?
+--------------------------------------------------------------
+- You can use profiles and permission sets to control access to data and features in Experience Cloud.
+- Profiles control what users can do in the community.
+- Permission sets extend user permissions without changing their profile.
+- Sharing sets control access to records based on criteria.
+- Sharing rules extend access to records based on criteria.
+- Criteria-based sharing rules extend access to records based on criteria.
+
+🟩 What is the importance of CMS is Experience cloud?
+------------------------------------------------------
+- Content Management System (CMS) is used to create, manage, and publish content in Experience Cloud.
+- provides personalized and dynamic content to users based on their profile and behavior.
+
+Example:
+- you can create a CMS collection to store images, documents, and other files.
+
+
+🟦 How you can track user engagment in Experience cloud?
+--------------------------------------------------------
+1. Google Analytics: to track page views, user behavior, and more.
+2. Salesforce Reporting and Dashboards: 
+   -use Standard Reports (e.g., Community Page Views, Active Users, Most Viewed Content).
+
+🟧 how to set up knowledge base in the experience cloud?
+--------------------------------------------------------
+1️⃣ Enable Salesforce Knowledge
+2️⃣ Create Knowledge Article Types
+3️⃣ Create Knowledge Articles
+4️⃣ Enable Topics for Objects
+
+
+- Enable knowledge setup in the service setup.
+- add text field to the knowledge object to store the URL of the article.
+- Enable Topics for objects for the knowledge object and select title and text fields.
+- add articles to the knowledge object.
+   example: 1- title: How to reset password, text: follow these steps to reset your password.
+            2- title: How to create an account, text: follow these steps to create an account.
+
+
+------------------------------------------------------------------------------------------------------------
+🟧 how to set up the chat Agent in the experience cloud?
+--------------------------------------------------------
+1️⃣ Create a Queue to add the messages that comes from the customers.
+   -got to service setup and select chat with customers.
+    -click on the chat settings and create a queue.
+    -add the queue name and select the chat agent.
+    -click on the save button.
+
+2️⃣ Configure Chat Agent.
+    -go to setup and search for chat agent.
+    -click on the chat agent and create a new chat agent.
+    -add the chat agent name and select the queue.
+    -click on the save button.
+3️⃣ Add the chat Agent session to the service cloud.
+    - go to app manager and select the service console app to add the chat agent session.
+4️⃣ Embed Chat on the experience cloud site.
+    - go to the experience cloud and select the chat component to add it to the site.
+
+🟦 What is the omni-channel in salesforce?
+------------------------------------------
+- routing tool that assigns customer to the right agent based on their skills and availability.
+Steps:
+1. Enable Omni-Channel.
+2. Create an Omni-Channel Presence Status.
+3. Create an Omni-Channel Routing Configuration.
+4. Add Agents to the Omni-Channel Routing Configuration.
+5. Add the Omni-Channel Utility to the Console App.
+6. Add the Omni-Channel Widget to the Console App.
+
+⬜ What is the Clickjacking in the experience cloud?
+----------------------------------------------------
+- is a way where the attacker tricks the user to click on a button or link that is hidden to attack the user.
+- to prevent clickjacking,
+  use the X-Frame-Options header to prevent your site from being embedded in iframes from untrusted sources.
+
+⬜ What is the i-Frame?
+--------------------- 
+- used to embed content from one website into another website.
+- used to display external content like videos, maps, or forms on your website.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/

@@ -1,0 +1,121 @@
+
+🟥 what is CPQ in Salesforce?
+------------------------
+- CPQ stands for Configure, Price, Quote.
+- It is a sales that helps sales teams quickly generate accurate quotes.
+- helps sales team to focus on selling rather than calculating prices and configuring products.
+- BY
+    1- Configure the right products based on business rules.
+       like avoiding unmatched products EX: can't sell auto pilot with gasoline car.
+            avoiding missing products EX: can't sell a printer without ink.
+    2- Set the right Price for the products based on pricing rules.
+       like applying discounts based on customer type or volume.
+    3- Generate accurate Quotes with all the necessary information.
+       like product details, pricing, terms, and conditions.
+
+
+🟥 CPQ Process
+----------- 
+Customer: i need 100 laptops, 50 software licenses, and 20 monitors.
+Sales Rep: we have what you need and i will email a quote by the end of the day.
+
+CPQ:
+
+1.Sales Rep creates an opportunity record in Salesforce.
+  Placeholder for the all actions related to the opportunity like adding products, setting quantities, and applying discounts.
+
+2.Sales Rep configures the products:
+
+3.CPQ Set the pricing:
+    - Calculate the total price based on the selected products and any applicable discounts.
+
+4.Sales Rep generates the quote:
+    - Create a quote record in Salesforce with all the necessary details.
+    - Include product information, pricing, terms, and conditions.
+
+5.Send the quote:
+    - Email the quote to the customer for review and acceptance.
+
+6.Convert to order:
+    - Once the quote is accepted, convert it into an order for fulfillment.
+    
+7.CPQ will automatically create assets,subscriptions, contracts, and entitlements based on the order.
+    - Assets: physical items sold to the customer.
+    - Subscriptions: recurring services (like software licenses for a year).
+    - Contracts: legal agreements with the customer.
+    - Entitlements: support or service rights associated with the products.
+
+8.Invoicing:
+    - Generate an invoice based on the order details.
+    - Send the invoice to the customer for payment.
+
+9.Payment processing:
+    - Process the payment based on the invoice.
+    - Update the order status to reflect payment received.
+
+10.Fulfillment:
+    - Deliver the products or services to the customer.
+
+
+🟥 what is the amendment Process in CPQ?
+-------------------------------------
+- Used to modify existing orders or subscriptions.
+- when a customer wants to change their order after it has been placed.
+- Example:
+    - A customer wants to add more products to their existing order.
+    - A customer wants to extend their subscription for an additional year.
+
+🟥 what is the renewal Process in CPQ?
+-------------------------------------
+- Used to renew existing subscriptions or contracts.
+- when a customer's subscription is about to expire and they want to continue using the service.
+- Example:
+    - A customer wants to renew their software license for another year.
+
+
+
+🟥 How to get started with CPQ?
+--------------------------
+1- Sign up for a Free Salesforce ORG with CPQ installed.
+  https://trailhead.salesforce.com/promo/orgs/cpqtrails
+
+2- installed CPQ managed package from Salesforce AppExchange.
+   - should buy a license
+   - packed created by third party company like conga or oracle.
+
+3- installed CPQ managed package from steelbrick.
+   - should buy a license
+   - packed created by Salesforce itself. https://install.steelbrick.com/
+
+Note: steelbrick is the original name of Salesforce CPQ before it was acquired by Salesforce in 2015.
+
+----------------------------------------------------------------------------------------------------------------
+🟥 CPQ package Settings
+-----------------------
+- Control how CPQ behaves in your Salesforce org.
+- Setup → Installed Packages → CPQ Package -> Configure
+- Tabs:
+   - Pricing and Calculations:
+       - Configure Unit Price Scale 1 or 2 or 3  how many Decimal places to show for unit prices.
+    
+
+-----------------------------------------------------------------------------------------------------------------
+🟥 CPQ Permissions Sets
+-----------------------
+- Control user access to CPQ features and data.
+- Setup → Users → Permission Sets
+- Key Permissions:
+   - Salesforce CPQ Admin 
+       - Full access to all CPQ features and settings.
+       - CPQ Admin
+   - Salesforce CPQ Admin User access
+       - Access to CPQ features and settings but not the core configurations like creating products or price rules.
+       - CPQ junior Admin
+   - Salesforce CPQ User
+       - Basic access to CPQ features for creating quotes and orders.
+   - Salesforce CPQ User Access
+       - Access to CPQ features but limited can't create or modify quotes or orders.
+---------------------------------------------------------------------------------------------------------------------
+https://akidev73-dev-ed.develop.my.salesforce.com
+cpq.expert@gmail.com
+2143Msms#

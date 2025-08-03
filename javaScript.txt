@@ -1,0 +1,183 @@
+/*
+
+🟪 What is Object-Oriented Programming (OOP)?
+---------------------------------------------
+- organizes code into classes and objects.
+- Class : is a blueprint for creating object.
+- Object : is an instance of a class that contains attributes and methods.
+
+key features of OOP:
+
+A- Encapsulation:
+   ---------------
+  - Data hiding + controlled access
+  - Achieved using access modifiers (private, protected, public, global) to control visibility of class members.
+    - Private : accessible only within the class.
+    - Protected : accessible within the class and its subclasses.
+    - Public : accessible from anywhere in the same namespace (The same ORG)(internal use).
+    - Global : accessible from anywhere in any org (Apex REST @RestResource)(external use).
+
+  Example:
+    public class Account {
+
+        private String name = 'Test Account';
+        public void setName(String n) {
+            name = n;
+        }
+        public String getName() {
+            return name;
+        }
+    }
+    
+    Account acc = new Account();
+    System.debug(acc.name); // Error: Variable is private
+    acc.setName('Test Account');
+    System.debug(acc.getName()); // Output: Test Account
+
+ B- inheritance:
+    -------------
+    allows a class to inherit properties and methods from another class instead of writing the same code again.
+    keywords: extends (for class inheritance) and implements (for interface inheritance).
+            : In Apex, parent class must be marked as virtual or abstract to be extended.
+            : In Java, all classes can be extended by default unless marked as final
+
+    Example:
+
+    // Parent class
+    public virtual class Vehicle {
+        public void startEngine() {
+            System.debug('Engine started');
+        }
+    }
+    
+    // Child class inheriting from Vehicle
+    public class Car extends Vehicle {
+        public void honk() {
+            System.debug('Beep Beep!');
+        }
+    }
+
+    // Using the child class
+    Car myCar = new Car();
+    myCar.startEngine(); // Output: Engine started
+    myCar.honk();        // Output: Beep Beep!
+
+
+    constructor: is a special method that is called when an object is created.
+    - used to initialize the object's state.
+    - should have the same name as the class.
+
+    Example:
+
+    public class Vehicle {
+        public Vehicle() {
+            System.debug('Vehicle is created');
+        }
+    }
+    Vehicle v = new Vehicle(); // Output: Vehicle is created
+
+    Super keyword: used to call the parent class constructor, methods, and variables in the child class.
+
+    Example:
+
+    public class Vehicle {
+        public Vehicle() {
+            System.debug('Vehicle is created');
+        }
+    }
+    
+    public class Car extends Vehicle {
+        public Car() {
+            super(); // Calling the parent class constructor
+            System.debug('Car is created');
+        }
+    }
+    
+    Car c = new Car(); // Output: Vehicle is created, Car is created
+
+    
+    static keyword: used to call the method without creating an instance of the class.
+
+    Example:
+
+    public class Vehicle {
+        public static void startEngine() {
+            System.debug('Engine started');
+        }
+    }
+    Vehicle.startEngine(); // Output: Engine started
+C- Polymorphism:
+  -------------
+   -allows the same method to perform different actions based on which object is calling it.
+   -used to override the methods in the child class with the same name in the parent class.
+   keywords:
+    virtual: on the parent class method to be extended and on the method to be overridden.
+    extends: on the child class to inherit the parent class.
+    override: on the child class method to override the parent class method.
+    Example:
+
+    public virtual class Animal {
+        public virtual void makeSound() {
+            System.debug('Animal makes a sound');
+        }
+    }
+    public class Dog extends Animal {
+        public void makeSound() {
+            System.debug('Dog barks');
+        }
+    }
+    public class Cat extends Animal {
+        public void makeSound() {
+            System.debug('Cat meows');
+        }
+    }
+    Animal a = new Dog();
+    a.makeSound(); // Output: Dog barks
+    a = new Cat();
+    a.makeSound(); // Output: Cat meows
+
+
+D- Abstraction:
+   ------------
+    -hides the complexity of the code and shows only the necessary features to the user.
+    - easy to update and maintain the code without affecting the user interface.
+    keywords: 
+     abstract : on the class to make it abstract and on the method to make it abstract.
+     override : on the child class method to override the parent class method.
+
+     abstract class can't be instantiated, but can be extended by other classes.
+
+    Example:
+
+    public abstract class Shape {
+        public abstract void draw();
+    }
+    public class Circle extends Shape {
+        public overide void draw() {
+            System.debug('Circle is drawn');
+        }
+    }
+    public class Rectangle extends Shape {
+        public override void draw() {
+            System.debug('Rectangle is drawn');
+        }
+    }
+    Shape s = new Circle();
+    s.draw(); // Output: Circle is drawn
+    s = new Rectangle();
+    s.draw(); // Output: Rectangle is drawn
+
+----------------------------------------------------------------------------------------------------------------------------
+🟪-What is the difference between parameters and arguments in JavaScript?
+-------------------------------------------------------------------------
+- Parameters are placeholders for the expected input in a function definition.
+- Arguments are the actual values passed to the function when it is called.
+
+Example:
+
+function add(a, b) { // a and b are parameters
+    return a + b;
+}
+add(5, 10); // 5 and 10 are arguments
+----------------------------------------------------------------------------------------------------------------------------
+*/

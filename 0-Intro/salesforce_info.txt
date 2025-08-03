@@ -1,0 +1,493 @@
+
+🟪 What is the salesforce order of execution?
+------------------------------------------
+- descripes the events that occur in salesforce when a record is saved
+
+the order of execution
+-----------------------
+1- load the record from the database if it is an update or delete operation
+    or create a new record if it is an insert operation using UI or API.
+
+
+2- system validation rules
+  ex: required fields, unique fields, field format, max length, etc.
+
+
+3- before save flow (Fast Field Updates Flow)
+    - used to perform operations before the record is saved to the database.
+    - before the record is saved to the database, the before triggers, validation rules, and flows are executed.
+
+
+4- before triggers(before insert, before update, before delete)
+    -because these triggers can modify the record before it is saved to the database
+
+   ex: Ensure the Account Name is in uppercase before saving the record.
+     : add a default value to a field if it is blank before saving the record.
+
+5- custom validation rules and system validation rules
+    - run again because the record may have been modified by the before triggers.
+    ex: prevent users from entering an email address without the @ symbol.
+      : prevent users from entering a phone number without the correct format.
+
+6-Duplicate rules
+    -to prevent duplicate records from being saved to the database.
+
+                        -------------------------------------------
+
+7- (Record saved + Id )but not yet committed to the database
+    - to allow all after triggers to run before the record is saved to the database.
+    - if there are any errors, the record is not saved to the database and it will rollback the transaction.
+
+                      --------------------------------------------
+
+8- after triggers(after insert, after update, after delete)
+    - used to perform operations after the record is saved to the database.
+
+   ex: send an email notification after a new oppointment is created.
+
+
+9- Assignment rules
+    - if the record is a lead or case, the assignment rules are executed to assign the record to a user or queue.
+
+10- auto-response rules
+    - if the record is a lead or case, the auto-response rules are executed to send an automatic email response.
+
+11- workflow rules
+    - used to automate standard internal procedures and processes to save time across your org.
+
+12- process builder and flows
+    - used to automate business processes and workflows.
+
+13- escalation rules    
+    - used to escalate cases based on certain criteria.
+
+14- entitlement rules
+    - used to enforce service level agreements (SLAs) for cases.
+
+15- Recorder triggered flows(after save flow)
+    - after the record is saved to the database, the after save flow is executed.
+
+16- Roll-up summary fields
+    - used to calculate the sum, minimum, or maximum value of a field in related records.
+
+17- Criteria-based sharing rules
+    - used to share records with users based on certain criteria.
+
+
+18- commit DML operation to the database
+    - if all operations are successful, the record is saved to the database.
+
+19- post-commit logic
+    - used to perform operations after the record is saved to the database.
+    Ex: send an email notification after a new record is created.
+
+
+----------------------------------------------------------------------------------------------------------------------------
+
+Note:
+-----
+- if the after trigger creates a new record, the entire process is repeated for the new record.
+
+- if the workflow rule updates the record, 4 steps are repeated (validation and triggers will run again)
+        (before triggers, custom validation rules, save the record, after triggers)
+
+
+Q- What will happen if we update value of the same field in before trigger and in before flow, which value will be saved in the database?
+A- The value updated in the before trigger will be saved in the database because the before trigger runs before the before flow.
+
+----------------------------------------------------------------------------------------------------------------------------
+🟥 What is the 15-Digit and 18-Digit Record Id in Salesforce?
+------------------------------------------------------------
+- The record Id is a unique identifier for each record in Salesforce used access records in the database.
+
+
+- 15-Digit Id:
+    - Case-sensitive 
+    - 15 characters long 001A0000009zXYZ != 001A0000009zXyZ
+    - used inside salesforce.
+    - accessible through the URL.
+    - Ex: https://na1.salesforce.com/001A0000009zXYZ
+    - lead to errors when used in external systems or APIs that are case-insensitive.
+
+- 18-Digit Id:
+    - Case-insensitive
+    - 18 characters long
+    - used in data exports, reports, and integrations to ensure unique identification of records.
+    - used in the salesforce API and external systems.
+    - The last 3 characters are a checksum of the first 15 characters to distinguish between similar Ids if A , a or 0, O
+    - accessible through the SQL query. Ex: SELECT Id FROM Account returns the 18-Digit Id by default.
+
+- How to convert 15-Digit Id to 18-Digit Id?
+    1- use formula field CASESAFEID(Id) to get the 18-Digit Id.
+    2- use apex code  Id.to18() to get the 18-Digit Id.
+
+Real-World Example:
+-------------------
+- when exporting account records from salesforce to an external system, use the 18-Digit Id to avoid any issues with case sensitivity.
+- add a custom field to the account object to store the 18-Digit Id for easy reference.
+- create a formula field to display the 18-Digit Id on the account record page layout.
+   CASESAFEID(Id)
+----------------------------------------------------------------------------------------------------------------------------
+
+🟥 what is Highlights Panel
+-----------------------------------
+- is a section in the record page layout that displays important information about the record.
+
+🟥 what is Dynamic Highlights Panel
+-----------------------------------
+- it is a new feature in salesforce that allows you to display different fields in the highlights panel based on the record type or other criteria.
+------------------------------------------------------------------------------------------------------------
+
+🟥 what is the page layout in salesforce?
+------------------------------------------------
+-it is a visual representation of a record in salesforce.
+- It defines the fields, sections, and related lists that are displayed on the record page.
+
+🟥 can we have multiple page layouts for the same object?
+------------------------------------------------
+- Yes, we can have multiple page layouts for the same object in salesforce.
+- you can assign different page layouts to different profiles or record types.
+
+🟥 what is the difference between page layout and record type?
+---------------------------------------------------------------
+- we use page layout when we want to control the visual representation of a record in salesforce 
+ ex: sales rep see specifi field but sales manager he wants to see all the fields in the record 
+
+- we use record type when we want to control the business logic of a record or display different picklist values for different users.
+Example: For a "Case" object, you might have:
+        Record Type = Customer Support → uses Support Layout & picklists
+        Record Type = Technical Support → uses Tech Layout & different picklists
+
+
+----------------------------------------------------------------------------------------
+ 🟥 can we change the label of the object in the tab?
+------------------------------------------------------
+- Yes, we can change the label of the object in the tab by editing the tab settings in salesforce.
+- This change will only affect the label of the tab and not the object itself.
+- Go to Setup → Rename Tabs and Labels
+
+
+-----------------------------------------------------------------------------------------
+🟥 What is AppExchange in Salesforce?
+-----------------------------------
+- marketplace for third-party applications and components to extend Salesforce functionality.
+- Apps can be free or paid.
+- developed by various vendors, including Salesforce itself.
+- have managed package and unmanaged package.
+- doesn't have core Salesforce apps like Sales Cloud or Service Cloud or salesforce CPQ.
+- Example:
+    - A user can search for a specific app like "DocuSign" to integrate electronic signatures into Salesforce.
+    - A user can find a reporting tool to enhance data visualization capabilities.
+
+-----------------------------------------------------------------------------------------------------------------
+🟥 What is managed package and unmanaged package in Salesforce?
+----------------------------------------------------------------
+- Managed Package:
+    - can't be modified after installation except for configuration.
+    - code is hidden and controlled by the package creator.
+    - good for commercial applications.
+    - provides version control and security.
+    - easy to upgrade.
+
+- Unmanaged Package:
+    - open-source package.
+    - can be modified after installation.
+    - code is visible and editable.
+    - good for development and testing purposes.
+    - no version control or security.
+
+
+-----------------------------------------------------------------------------------------------------------------
+🟥 What are different types of salesforce orgs?
+-------------------------------------------------------------
+🔹 Developer orgs:
+    - used for learning and exploring Salesforce features.
+    - free and have limited storage and features.
+
+🔹 Sandbox orgs:
+    - copy of the production org for testing and development without affecting live data.
+    - can be refreshed from the production org.
+    types of sandboxes:
+
+        ✅ 1- Developer Sandbox:
+            - copy meta data only like the name of objects, fields.
+            - 200 MB storage limit for test data.
+            - refreshed every 1 day.
+            - developed + test features like (Flow, Apex,LWC) with simple test data created manually.
+            - Used by developer
+
+        ✅ 2- Developer Pro Sandbox:
+            - similar to Developer Sandbox but with 1 GB storage limit data sets for testing.
+            - developed + test features with bulk data with larger test data sets imported using data loader.
+            - Used by developer
+
+        ✅ 3- Partial Copy Sandbox:
+            - meta data + subset of data from the production org .
+            - you can select specific objects and records to copy using a sandbox template.
+            - 5 GB storage limit.
+            - refreshed every 5 days.
+            - used to test features with a realistic data set.
+            - Used by QA by Engineer
+
+
+        ✅ 4- Full Sandbox:
+            - metadata + all data
+            - 100% storage limit.
+            - refreshed every 29 days means you can update the sandbox from the production org every 29 days.
+            - Final testing before production with real data.
+            - Used by admin/DevOps team.
+
+🔹 Production orgs:
+    - live environment for real business operations with real users and customers.
+    - used by sales reps and managers.
+    - can't be refreshed meaning it can't be reset to a previous state because it contains real data and transactions.
+    - No rollback option available.
+
+-----------------------------------------------------------------------------------------------------------------
+🟥 How to share data between salesforce orgs?
+---------------------------------------------
+🔵 If the Orgs Are Related  Sandbox → Production)
+   - Use change sets to deploy metadata changes.
+   - DevOps tools (Gearset, Copado)
+
+🔵 If the Orgs Are Not Related (company A manufacturer → company B reseller)(company A wants to send new product data to company B)
+   - Salesforce-to-Salesforce	Share records via subscriptions.
+                                Company A (publisher) shares records with Company B (subscriber).
+                                No code needed
+
+   - REST API (Apex Callout)	Send data from Org A → Org B
+                                Use Apex code to make REST API callouts to send data.
+                                Requires coding skills.
+    
+   -Middleware (MuleSoft)	    Integrate data between Org A and Org B.
+                                Use middleware tools to connect and sync data.
+                                Requires middleware expertise.
+
+  How to configure REST API in Salesforce to send data to another org?
+  --------------------------------------------------------------------
+  On ORG A:
+  - Create apex class to send product data to Org B.
+  - used name credential to store authentication details for Org B like
+    - URL of Org B
+    - authentication type (OAuth, Basic Auth)
+    - Use HttpRequest and HttpResponse classes to make the API callout.
+    - Example:
+        ```apex
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint('https://orgB.salesforce.com/services/data/vXX.X/sobjects/Product__c/');
+        req.setMethod('POST');
+        req.setHeader('Authorization', 'Bearer ' + accessToken);
+        req.setHeader('Content-Type', 'application/json');
+        req.setBody('{"Name": "New Product", "Price__c": 100}');
+
+        Http http = new Http();
+        HttpResponse res = http.send(req);
+        ```
+    - Handle the response to check if the data was sent successfully.
+    On ORG B:
+  - Create a REST API endpoint to receive data from Org A.
+  - Use @RestResource annotation to expose the endpoint.
+  - Implement logic to process incoming data and create/update records.
+  - Example:
+      ```apex
+      @RestResource(urlMapping='/Product__c/*')
+      global with sharing class ProductRestResource {
+          @HttpPost
+          global static String doPost(String Name, Decimal Price__c) {
+              Product__c product = new Product__c(Name = Name, Price__c = Price__c);
+              insert product;
+              return product.Id;
+          }
+      }
+  
+🟥 What are change sets in Salesforce?
+-------------------------------------------------
+- Used to deploy metadata changes between related Salesforce orgs (e.g., Sandbox to Production).
+- adding or updating metadata but can't delete anything.
+- deploy PageLayouts replace existing layouts.
+
+Note:
+- to delete metadata, you need to use the Metadata API.
+------------------------------------------------------------------------------------------------------------------
+🟥 What is the metadata API?
+---------------------------
+- allows you to deploy, retrieve, update, and delete Salesforce metadata (not data).
+- Example:
+    - deploy a new custom field to the Account object and delete an old field that is no longer used,
+       using VS Code and Metadata API.
+
+Steps to create new custom field:
+1. Create folder in VS Code for metadata files.(objects/Account/fields/)
+2. Create a new file for the custom field (e.g., MyCustomField__c.field-meta.xml).
+3. Define the field properties in the XML file, such as field type, label, and API name.
+4. Save the file in the appropriate folder structure.
+5. Use the Salesforce CLI to deploy the metadata changes:
+   ```bash
+   sfdx force:source:deploy -p path/to/your/metadata/folder
+    ```
+- Example:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>MyCustomField__c</fullName>
+    <label>My Custom Field</label>
+    <type>Text</type>
+    <length>255</length>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <visibleLines>1</visibleLines>
+    <inlineHelpText>This is my custom field.</inlineHelpText>
+</CustomField>
+```
+- After deploying, the new custom field will be available in the Account object in Salesforce.
+- To delete an old field,
+1. Create destructiveChanges.xml file in the root folder to list the fields to be deleted.
+2- create package.xml file trequired for the deployment.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>OldField__c</members>
+        <name>CustomField</name>
+    </types>
+    <version>57.0</version>
+</Package>
+```
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+  <version>59.0</version>
+</Package>
+```
+
+------------------------------------------------------------------------------------------------------------------
+🟪 What is the diference between Data and meta data?  
+----------------------------------------------------
+- Data:
+    - actual information stored in Salesforce records.
+    - can be queried using SOQL and manipulated using DML operations.
+- Metadata:
+    - Data about data to define the structure and behavior of Salesforce components.
+    - Field names, validation rules, apex classes, etc.
+    - can be deployed using change sets, metadata API, or tools like Ant and Salesforce CLI.
+    - can be queried using Metadata API or Tooling API.
+
+------------------------------------------------------------------------------------------------------------------------
+🟪 What is the difference between Custom Object, Custom Settings, and Custom Metadata Types?
+---------------------------------------------------------------------------------------------
+
+| Feature           | Custom Object            | Custom Settings                 | Custom Metadata Types           |                 
+|-------------------|--------------------------|---------------------------------|---------------------------------|
+| Data              | business data            | configuration data or global    | configuration data or global    |
+|                   |                          | Data that need  to be accessed  | Data that need to be accessed   |
+|                   |                          | frequently &  Fast and          | frequently & Fast and           |
+|                   |                          |  Easy to manage                 |  Easy to manage                 |                             
+|                   |                          |                                 |                                 |
+| Examples          | Accounts, Contacts       | maximum discount per user       | List of enabled countries       |
+|                   |                          | Profile                         |                                 |
+|                   |                          |                                 |                                 |
+|Storage            | DB                       | Cached in memory /DB            | Cached in memory  /DB           |
+|                   |                          |                                 |                                 |
+| Access            | SOQL queries             | Direct access using methods     | Direct access using methods     |
+|                   |                          | No SOQL queries required        | /SOQL queries (Filtering)       |
+|                   |                          | getInstance(),getInstance()     | getInstance(),getInstance()     |
+|                   |                          |                                 |                                 |
+| Governor Limits   | Counted against          | Not counted against governor    | Not counted against governor    |
+|                   | governor limits          | limits                          |  limits                         |
+|                   |                          |                                 |                                 |
+| Deployment        | Not deployable           | Not deployable                  | Deployable across orgs using    |
+|                   | Metadata only not data,  | Metadata only not data ,        | change sets                     |
+|                   | should use data loader - | should use data loader or       | Metadata and data               |
+|                   | import & export data     | import & export data manually   |                                 |
+|                   | manually.                |                                 |                                 |
+|                   |                          |                                 |                                 |
+| Tabs              | available                | not available                   | available                       |
+|                   |                          |                                 |                                 |
+| PageLayouts &     | available                | not available                   | available                       |
+| ValidationRules & |                          |                                 |                                 |
+| Relationships     |                          |                                 |                                 |
+|                   |                          |                                 |                                 |
+| Accessible in     | Validation Rules, Flows, | Validation Rules, Flows, Apex   | Validation Rules, Flows, Apex   |
+|                   | Apex Code, Formulas      | Code, Formulas                  | Code, Formulas                  |
+|                   |                          |                                 |                                 |
+| Types             |   NA                     | List (same data for all users)  |    N/A                          |   
+|                   |                          | Hierarchy (data varies by user) |                                 |
+|                   |                          |                                 |                                 |
+| insert new record | yes                      | No ,Read Only                   | No ,Read Only                   |  
+|  via Apex         |                          |                                 |                                 |
+--------------------------------------------------------------------------------------------------------------------
+🔹 Real senario for Custom settings:
+
+- Use Case: Control the maximum discount allowed for different user profiles.
+
+        1- Create a Hierarchy Custom Setting called "Discount Settings".
+        2- Add a field "Max Discount" of type Number.
+        3- manage settings for different profiles:
+           - Admin profile: Max Discount = 20%
+           - Sales Rep profile: Max Discount = 15%
+           - Customer Support profile: Max Discount = 10%
+        4- Use this setting in Apex code to enforce discount limits:
+        ```apex
+        Decimal maxDiscount = Discount_Settings__c.getInstance(UserInfo.getProfileId()).Max_Discount__c;
+        if (requestedDiscount > maxDiscount) {
+            throw new DiscountLimitException('Discount exceeds allowed limit for your profile.');
+        }
+        ```
+        5- Use this setting in Validation Rules to enforce business logic:
+        ```plaintext
+        IF(Discount__c > $Setup.Discount_Settings__c.Max_Discount__c, 
+           true, 
+           false)
+
+        6- Use this setting in Formulas field to display the maximum discount allowed for the user:
+        ```plaintext
+        $Setup.Discount_Settings__c.Max_Discount__c
+
+🔹 Real senario for Custom metadata types:
+
+- Use Case: Create a list to store supported countries and their currency codes.
+        1- Create a List Custom Metadata Type called "Supported Countries".
+        2- Add fields "Country Name" (Text) and "Currency Code" (Text) and Is_Enabled (Checkbox).
+        3- Add records for each country:
+           - United States, USD, true
+           - Canada, CAD, true
+           - Mexico, MXN, false (not enabled)
+        4- Use this setting to create a validation rule to ensure only enabled countries are selected:
+        ```plaintext
+        NOT($CustomMetadata.Supported_Countries__mdt.Is_Enabled__c)
+        5- Use this setting in Apex code to get the list of enabled countries:
+        ```apex
+        List<Supported_Countries__mdt> enabledCountries = [SELECT MasterLabel, Currency_Code__c FROM Supported_Countries__mdt WHERE Is_Enabled__c = true];
+        ``` 
+        or 
+        ```apex
+        Map<String, Supported_Country__mdt> countriesMap = Supported_Country__mdt.getAll();
+        List<Supported_Country__mdt> enabledCountries = new List<Supported_Country__mdt>();
+
+        for (Supported_Country__mdt country : countriesMap.values()) {
+            if (country.Is_Enabled__c) {
+                enabledCountries.add(country);
+            }
+        }
+        ```
+
+-----------------------------------------------------------------------------------------------------------------------------
+🟥 What is the custom Labels?
+---------------------------------------------------
+- used to store text values that can be translated into different languages.
+- Example: Store error messages, button labels, or any text that needs to be displayed in the user interface.
+- Accessible in Apex code, Visualforce pages, and Lightning components.
+- Example:
+```apex
+String errorMessage = Label.InvalidEmailError;
+```
+- Can be used in validation rules, formula fields, and flows.
+- Example:
+```plaintext
+IF(ISBLANK(Email__c),
+   Label.EmailRequiredError,
+   null)
+
+--------------------------------------------------------------------------------------------------------------------------

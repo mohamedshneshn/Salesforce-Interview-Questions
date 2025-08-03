@@ -13,10 +13,13 @@
 
 
 
-
+⬜-What is the difference between workflow task and alert?
+-------------------------------------------------------
+- Workflow Task: used to assign a task to a user or queue.
+- Workflow Alert: used to send an email to a user or queue.
 
 ---------------------------------------------------------------------------------------------------------------------------------------------
-- Approval Processes:
+ ⬜- Approval Processes:
     - Approval processes are used to automate the approval of records in Salesforce .
     - Ex: when the sales rep needs to make a discount more than 10%, the manager needs to approve it.
 
@@ -35,8 +38,9 @@
         6- Activate the approval process.
 
     Note:
-    - actions can be[ Field Update, Email Alert, Outbound Message, Task, Custom Action]
-    - approvers can be[ User, Role, Role Hierarchy, Public Group, Custom Hierarchy]
+    🟥 - actions can be[ Field Update, Email Alert, Outbound Message, Task, Custom Action]
+       - approvers can be[ User, Role, Role Hierarchy, Public Group, Custom Hierarchy]
+    ⬜ -Note you can send SMS using external services like Twilio or Plivo.
 
 ---------------------------------------------------------------------------------------------------------------------------------------------
  

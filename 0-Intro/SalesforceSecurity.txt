@@ -1,0 +1,32 @@
+
+🟥 What is the Audit Trail in Salesforce?
+-------------------------------------------------
+- Provides a log of all changes, including who made the change, when it was made, and what the change was.
+- Useful for tracking changes to records, fields, and metadata.
+- Accessible in Setup → Security Controls → View Setup Audit Trail.
+----------------------------------------------------------------------------------------------------------------------------
+🟥 What is the difference between Remote Site Settings and CORS in Salesforce?
+------------------------------------------------------------------------------
+| Feature              | Remote Site Settings                         | CORS (Cross-Origin Resource Sharing)  |
+| -------------------- | -------------------------------------------- | ------------------------------------- |
+| Used for             | Allowing Salesforce Apex code                | Allowing  apps (Postman, JS apps).    |
+|                      | to call external APIs (HTTP callouts)        | to call Salesforce                    |             
+|                      |                                              |                                       |
+| Applies to           | Calls going out From Salesforce              | Calls coming into Salesforce          |
+|                      | to external systems                          | from external sites (browsers)        |
+|                      |                                              |                                       |
+| Security Purpose.    | Protects Salesforce from calling             | Controls who can call Salesforce APIs |
+|                      | untrusted external sites                     |  via browser                          |
+|                      |                                              |                                       |
+| Header-Based       | No headers, just permission for callouts       | Adds CORS headers to HTTP responses   |
+
+----------------------------------------------------------------------------------------------------------------------------
+🟥  What are the named credentials in Salesforce?
+-------------------------------------------------
+- Stored authentication information for external systems.
+- endpoint URL + API Key + authentication method (e.g., OAuth, Basic Auth), and any required headers.
+- Used in Apex code, Flow to make secure callouts without hardcoding sensitive information.
+- They support both "Named Principal" (same token for all users) and "Per User" (individual tokens for each user) authentication.
+
+--------------------------------------------------------------------------------------------------------------------------
+
